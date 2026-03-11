@@ -1,0 +1,8 @@
+# Redirect rules for Next.js on Netlify
+# These ensure proper routing for the Next.js app
+
+# API routes - proxy to Next.js functions
+/api/*  /.netlify/functions/:splat  200
+
+# All other routes - handled by Next.js
+/*  /index.html  200

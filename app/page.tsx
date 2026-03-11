@@ -1,0 +1,32 @@
+import { getCurrentUser } from "@/lib/auth"
+import { Navigation } from "@/components/navigation"
+import { HeroSection } from "@/components/hero-section"
+import { FeaturesSection } from "@/components/features-section"
+import { LearningPaths } from "@/components/learning-paths"
+import { IncomeQuiz } from "@/components/income-quiz"
+import { CompoundCalculator } from "@/components/compound-calculator"
+import { SuccessStories } from "@/components/success-stories"
+import { ResourcesSection } from "@/components/resources-section"
+import { StepGuide } from "@/components/step-guide"
+import { CtaFooter } from "@/components/cta-footer"
+
+export default async function Page() {
+  const user = await getCurrentUser()
+
+  return (
+    <div className="min-h-screen bg-background">
+      <Navigation user={user} />
+      <main>
+        <HeroSection />
+        <FeaturesSection />
+        <LearningPaths />
+        <IncomeQuiz />
+        <CompoundCalculator />
+        <SuccessStories />
+        <ResourcesSection />
+        <StepGuide />
+        <CtaFooter />
+      </main>
+    </div>
+  )
+}
