@@ -116,7 +116,7 @@ export function AdminCourses() {
     }
   }
 
-  const handleDelete = async (courseId: number) {
+  const handleDelete = async (courseId: number) => {
     if (!confirm("Are you sure you want to delete this course?")) return
 
     try {
