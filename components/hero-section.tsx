@@ -3,6 +3,8 @@
 import Link from "next/link"
 import { ArrowRight, Plane, Code2, Bitcoin, ShoppingBag, BarChart3, Zap } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import { ScrollReveal } from "./scroll-reveal"
+import { AnimatedCounter } from "./animated-counter"
 
 const topics = [
   { label: "Travel", href: "/topics/travel", icon: Plane, color: "bg-blue-50 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400" },
@@ -78,9 +80,22 @@ export function HeroSection() {
 
         {/* Stats */}
         <div className="mt-14 flex flex-wrap items-center justify-center gap-10 border-t border-border pt-10 animate-fade-up-delay-4">
-          {stats.map((s) => (
-            <div key={s.label} className="text-center">
-              <p className="text-3xl font-bold text-foreground">{s.value}</p>
+          {stats.map((s, index) => (
+            <div key={s.label} className="text-center stagger-item">
+              <p className="text-3xl font-bold text-foreground">
+                {s.value.includes("+") ? (
+                  <>
+                    <AnimatedCounter
+                      value={parseInt(s.value)}
+                      duration={1.5}
+                      delay={0.2 + index * 0.1}
+                    />
+                    +
+                  </>
+                ) : (
+                  s.value
+                )}
+              </p>
               <p className="mt-0.5 text-sm text-muted-foreground">{s.label}</p>
             </div>
           ))}

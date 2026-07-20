@@ -5,7 +5,10 @@ import { FeaturesSection } from "@/components/features-section"
 import { LearningPaths } from "@/components/learning-paths"
 import { IncomeQuiz } from "@/components/income-quiz"
 import { CompoundCalculator } from "@/components/compound-calculator"
+import { StatisticsSection } from "@/components/statistics-section"
 import { SuccessStories } from "@/components/success-stories"
+import { FAQSection } from "@/components/faq-section"
+import { CommunityFeed } from "@/components/community-feed"
 import { ResourcesSection } from "@/components/resources-section"
 import { StepGuide } from "@/components/step-guide"
 import { DonateSectionWrapper } from "@/components/donate-section-wrapper"
@@ -25,7 +28,10 @@ export default async function Page() {
         <LearningPaths />
         <IncomeQuiz />
         <CompoundCalculator />
+        <StatisticsSection />
         <SuccessStories />
+        <FAQSection />
+        <CommunityFeed />
         <ResourcesSection />
         <StepGuide />
         <DonateSectionWrapper />
