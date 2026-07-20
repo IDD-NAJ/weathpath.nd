@@ -26,7 +26,7 @@ export default async function AdminLayout({
       <AdminSidebar />
       <SidebarInset>
         <AdminHeader userName={user.name} profilePhotoUrl={user.profile_photo_url} />
-        <main className="flex-1 overflow-y-auto p-6">{children}</main>
+        <main className="flex-1 overflow-y-auto p-3 sm:p-6">{children}</main>
       </SidebarInset>
     </SidebarProvider>
   )

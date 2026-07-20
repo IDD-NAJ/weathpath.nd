@@ -130,8 +130,8 @@ export function AdminCourses() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h3 className="font-serif text-2xl font-bold text-foreground">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <h3 className="font-semibold text-lg text-foreground md:text-2xl">
           Manage Courses
         </h3>
         <Button
@@ -148,7 +148,7 @@ export function AdminCourses() {
             })
             setShowForm(!showForm)
           }}
-          className="gap-2 rounded-sm"
+          className="w-full gap-2 rounded-sm sm:w-auto"
         >
           <Plus className="h-4 w-4" />
           New Course
@@ -188,7 +188,7 @@ export function AdminCourses() {
             className="w-full rounded-sm border border-border bg-background px-4 py-2 text-foreground"
           />
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div>
               <label className="block text-sm font-medium text-foreground mb-1">
                 Price (cents)
@@ -218,7 +218,7 @@ export function AdminCourses() {
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div>
               <label className="block text-sm font-medium text-foreground mb-1">
                 Level
@@ -246,15 +246,15 @@ export function AdminCourses() {
             </div>
           </div>
 
-          <div className="flex gap-2">
-            <Button type="submit" className="rounded-sm flex-1">
+          <div className="flex flex-col gap-2 sm:flex-row">
+            <Button type="submit" className="w-full rounded-sm sm:flex-1">
               {editingId ? "Update Course" : "Create Course"}
             </Button>
             <Button
               type="button"
               variant="outline"
               onClick={() => setShowForm(false)}
-              className="rounded-sm flex-1"
+              className="w-full rounded-sm sm:flex-1"
             >
               Cancel
             </Button>
@@ -298,7 +298,7 @@ export function AdminCourses() {
                       {course.is_visible ? "Visible" : "Hidden"}
                     </span>
                   </td>
-                  <td className="px-4 py-3 space-x-2">
+                  <td className="px-4 py-3 space-x-1">
                     <Button
                       onClick={() => handleToggleVisibility(course)}
                       variant="outline"
@@ -307,9 +307,9 @@ export function AdminCourses() {
                       title={course.is_visible ? "Hide" : "Show"}
                     >
                       {course.is_visible ? (
-                        <Eye className="h-4 w-4" />
+                        <Eye className="h-3 w-3" />
                       ) : (
-                        <EyeOff className="h-4 w-4" />
+                        <EyeOff className="h-3 w-3" />
                       )}
                     </Button>
                     <Button
@@ -318,7 +318,7 @@ export function AdminCourses() {
                       size="sm"
                       className="rounded-sm"
                     >
-                      <Edit2 className="h-4 w-4" />
+                      <Edit2 className="h-3 w-3" />
                     </Button>
                     <Button
                       onClick={() => handleDelete(course.id)}
@@ -326,7 +326,7 @@ export function AdminCourses() {
                       size="sm"
                       className="rounded-sm text-red-600 hover:text-red-700"
                     >
-                      <Trash2 className="h-4 w-4" />
+                      <Trash2 className="h-3 w-3" />
                     </Button>
                   </td>
                 </tr>

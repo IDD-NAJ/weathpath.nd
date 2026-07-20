@@ -7,21 +7,16 @@ export const metadata = {
 
 export default function AdminCoursesPage() {
   return (
-    <SimpleLayoutWrapper>
-      <div className="min-h-screen bg-background">
-        <div className="mx-auto max-w-7xl px-6 py-12">
-          <div className="mb-8">
-            <h1 className="font-serif text-4xl font-bold text-foreground mb-2">
-              Course Management
-            </h1>
-            <p className="text-muted-foreground">
-              Create, edit, delete, and manage course visibility and pricing.
-            </p>
-          </div>
-
-          <AdminCourses />
-        </div>
+    <div className="flex flex-col gap-6">
+      <div>
+        <h1 className="text-2xl font-bold tracking-tight text-foreground">
+          Course Management
+        </h1>
+        <p className="text-sm text-muted-foreground">
+          Create, edit, delete, and manage course visibility and pricing.
+        </p>
       </div>
-    </SimpleLayoutWrapper>
+      <AdminCourses />
+    </div>
   )
 }
