@@ -1,19 +1,22 @@
 import { notFound } from "next/navigation"
 import Link from "next/link"
-import { ArrowLeft, CheckCircle2, ShoppingCart, Users, Star, Clock } from "lucide-react"
+import { ArrowLeft, CheckCircle2, ShoppingCart, Users, Star, Clock, Play } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { SimpleLayoutWrapper } from "@/components/layout-wrapper"
 import { CourseCheckout } from "@/components/course-checkout"
 import { CourseModules } from "@/components/course-modules"
 import { neon } from "@neondatabase/serverless"
+import { verifyPurchaseAccess } from "@/lib/purchase-service"
+import { headers } from "next/headers"
 
 export const dynamic = 'force-dynamic'
 
-export async function generateMetadata({ params }: { params: { slug: string } }) {
+export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
+  const resolvedParams = await params
   const sql = neon(process.env.DATABASE_URL!)
   const result = await sql(
     "SELECT title, description FROM courses WHERE slug = $1",
-    [params.slug]
+    [resolvedParams.slug]
   )
   const course = result[0]
 
@@ -27,26 +30,34 @@ export async function generateMetadata({ params }: { params: { slug: string } })
 
 export default async function CourseDetailPage({
   params,
+  searchParams,
 }: {
-  params: { slug: string }
+  params: Promise<{ slug: string }>
+  searchParams: Promise<{ email?: string }>
 }) {
+  const resolvedParams = await params
+  const resolvedSearchParams = await searchParams
   let course = null
   try {
     const sql = neon(process.env.DATABASE_URL!)
     const result = await sql(
       "SELECT * FROM courses WHERE slug = $1",
-      [params.slug]
+      [resolvedParams.slug]
     )
-    console.log('[v0] Course query result:', result.length, 'for slug:', params.slug)
+    console.log('[v0] Course query result:', result.length, 'for slug:', resolvedParams.slug)
     course = result[0]
   } catch (error: any) {
     console.error('[v0] Failed to fetch course:', error.message)
   }
 
   if (!course) {
-    console.log('[v0] Course not found for slug:', params.slug)
+    console.log('[v0] Course not found for slug:', resolvedParams.slug)
     notFound()
   }
+
+  // Check if user has already purchased this course
+  const email = resolvedSearchParams.email
+  const hasPurchased = email ? await verifyPurchaseAccess(course.id, email) : false
 
   const benefits = [
     "Lifetime access to course materials",
@@ -169,9 +180,36 @@ export default async function CourseDetailPage({
               </div>
             </div>
 
-            {/* Right: Checkout */}
+            {/* Right: Checkout or Access */}
             <div className="animate-fade-up lg:sticky lg:top-24 lg:h-fit">
-              <CourseCheckout course={course} />
+              {hasPurchased ? (
+                <div className="rounded-sm border border-border bg-card p-8 space-y-6">
+                  <div className="text-center space-y-4">
+                    <div className="flex justify-center">
+                      <div className="rounded-full bg-green-500/20 p-3">
+                        <CheckCircle2 className="h-6 w-6 text-green-600" />
+                      </div>
+                    </div>
+                    <h3 className="font-serif text-2xl font-bold text-foreground">
+                      You Own This Course!
+                    </h3>
+                    <p className="text-muted-foreground">
+                      You have full access to all materials and lessons.
+                    </p>
+                  </div>
+                  <Button asChild className="w-full gap-2 py-6 rounded-sm font-semibold text-base bg-green-600 hover:bg-green-700">
+                    <Link href={`/courses/${course.slug}/learn?email=${encodeURIComponent(email!)}`}>
+                      <Play className="h-5 w-5" />
+                      Start Learning
+                    </Link>
+                  </Button>
+                  <Button asChild variant="outline" className="w-full rounded-sm">
+                    <Link href="/courses">Browse Other Courses</Link>
+                  </Button>
+                </div>
+              ) : (
+                <CourseCheckout course={course} />
+              )}
             </div>
           </div>
         </div>
