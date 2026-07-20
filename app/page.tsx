@@ -8,7 +8,10 @@ import { CompoundCalculator } from "@/components/compound-calculator"
 import { SuccessStories } from "@/components/success-stories"
 import { ResourcesSection } from "@/components/resources-section"
 import { StepGuide } from "@/components/step-guide"
+import { DonateSectionWrapper } from "@/components/donate-section-wrapper"
 import { CtaFooter } from "@/components/cta-footer"
+
+export const dynamic = 'force-dynamic'
 
 export default async function Page() {
   const user = await getCurrentUser()
@@ -25,6 +28,7 @@ export default async function Page() {
         <SuccessStories />
         <ResourcesSection />
         <StepGuide />
+        <DonateSectionWrapper />
         <CtaFooter />
       </main>
     </div>

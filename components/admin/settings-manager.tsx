@@ -18,6 +18,7 @@ export function SettingsManager({ initialSettings }: SettingsManagerProps) {
   const general = (initialSettings.general as Record<string, string>) || {}
   const features = (initialSettings.features as Record<string, boolean>) || {}
   const contact = (initialSettings.contact as Record<string, string>) || {}
+  const donations = (initialSettings.donations as Record<string, string>) || {}
 
   const [siteName, setSiteName] = useState(general.site_name || "WealthPath")
   const [tagline, setTagline] = useState(general.tagline || "Your Guide to Building Passive Wealth")
@@ -32,13 +33,20 @@ export function SettingsManager({ initialSettings }: SettingsManagerProps) {
   const [twitterUrl, setTwitterUrl] = useState(contact.twitter || "")
   const [linkedinUrl, setLinkedinUrl] = useState(contact.linkedin || "")
 
+  const [bitcoinAddress, setBitcoinAddress] = useState(donations.bitcoin || "")
+  const [ethereumAddress, setEthereumAddress] = useState(donations.ethereum || "")
+  const [usdtAddress, setUsdtAddress] = useState(donations.usdt || "")
+  const [moneroAddress, setMoneroAddress] = useState(donations.monero || "")
+
   const [pendingGeneral, startGeneralTransition] = useTransition()
   const [pendingFeatures, startFeaturesTransition] = useTransition()
   const [pendingContact, startContactTransition] = useTransition()
+  const [pendingDonations, startDonationsTransition] = useTransition()
 
   const [savedGeneral, setSavedGeneral] = useState(false)
   const [savedFeatures, setSavedFeatures] = useState(false)
   const [savedContact, setSavedContact] = useState(false)
+  const [savedDonations, setSavedDonations] = useState(false)
 
   function saveGeneral() {
     startGeneralTransition(async () => {
@@ -81,6 +89,19 @@ export function SettingsManager({ initialSettings }: SettingsManagerProps) {
       ])
       setSavedContact(true)
       setTimeout(() => setSavedContact(false), 2000)
+    })
+  }
+
+  function saveDonations() {
+    startDonationsTransition(async () => {
+      await updateMultipleSettings([
+        {
+          key: "donations",
+          value: { bitcoin: bitcoinAddress, ethereum: ethereumAddress, usdt: usdtAddress, monero: moneroAddress },
+        },
+      ])
+      setSavedDonations(true)
+      setTimeout(() => setSavedDonations(false), 2000)
     })
   }
 
@@ -185,6 +206,48 @@ export function SettingsManager({ initialSettings }: SettingsManagerProps) {
               <Save className="h-4 w-4" />
             )}
             {savedContact ? "Saved" : "Save Contact"}
+          </Button>
+        </CardFooter>
+      </Card>
+
+      {/* Cryptocurrency Donations */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base">Cryptocurrency Donations</CardTitle>
+          <CardDescription>Add wallet addresses for cryptocurrency donations</CardDescription>
+        </CardHeader>
+        <CardContent className="flex flex-col gap-4">
+          <div className="flex flex-col gap-2">
+            <Label htmlFor="bitcoin">Bitcoin (BTC) Address</Label>
+            <Input id="bitcoin" value={bitcoinAddress} onChange={(e) => setBitcoinAddress(e.target.value)} placeholder="1A1z7agoat7qxSpZxyjzYkYVfB5z4WSQmF" />
+            <p className="text-xs text-muted-foreground">Public Bitcoin address for donations</p>
+          </div>
+          <div className="flex flex-col gap-2">
+            <Label htmlFor="ethereum">Ethereum (ETH) Address</Label>
+            <Input id="ethereum" value={ethereumAddress} onChange={(e) => setEthereumAddress(e.target.value)} placeholder="0x742d35Cc6634C0532925a3b844Bc7e7595f42aE" />
+            <p className="text-xs text-muted-foreground">Public Ethereum address (also works for ERC-20 tokens)</p>
+          </div>
+          <div className="flex flex-col gap-2">
+            <Label htmlFor="usdt">USDT Address (Tron/Polygon)</Label>
+            <Input id="usdt" value={usdtAddress} onChange={(e) => setUsdtAddress(e.target.value)} placeholder="Enter USDT wallet address" />
+            <p className="text-xs text-muted-foreground">USDT wallet address (can be Tron TRC-20 or Polygon)</p>
+          </div>
+          <div className="flex flex-col gap-2">
+            <Label htmlFor="monero">Monero (XMR) Address</Label>
+            <Input id="monero" value={moneroAddress} onChange={(e) => setMoneroAddress(e.target.value)} placeholder="Enter Monero address" />
+            <p className="text-xs text-muted-foreground">Public Monero address for privacy-focused donations</p>
+          </div>
+        </CardContent>
+        <CardFooter>
+          <Button onClick={saveDonations} disabled={pendingDonations} size="sm" className="gap-1.5">
+            {pendingDonations ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : savedDonations ? (
+              <Check className="h-4 w-4" />
+            ) : (
+              <Save className="h-4 w-4" />
+            )}
+            {savedDonations ? "Saved" : "Save Donations"}
           </Button>
         </CardFooter>
       </Card>
