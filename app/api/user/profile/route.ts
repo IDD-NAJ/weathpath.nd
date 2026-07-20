@@ -2,12 +2,14 @@ import { NextRequest, NextResponse } from "next/server"
 import { getCurrentUser } from "@/lib/auth"
 import { sql } from "@/lib/db"
 import { z } from "zod"
+export const dynamic = 'force-dynamic'
 
 const profileSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters").max(50, "Name must be less than 50 characters"),
   email: z.string().email("Please enter a valid email address"),
   bio: z.string().max(500, "Bio must be less than 500 characters").optional(),
 })
+
 
 export async function GET() {
   try {
@@ -33,6 +35,7 @@ export async function GET() {
     return NextResponse.json({ error: 'Failed to fetch profile' }, { status: 500 })
   }
 }
+
 
 export async function PUT(request: NextRequest) {
   try {

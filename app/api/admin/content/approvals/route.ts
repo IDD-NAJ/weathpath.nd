@@ -6,6 +6,9 @@ import {
   rejectContent 
 } from "@/lib/content-manager"
 
+export const dynamic = 'force-dynamic'
+
+
 export async function GET(request: NextRequest) {
   try {
     const currentUser = await getCurrentUser()
@@ -31,6 +34,7 @@ export async function GET(request: NextRequest) {
     )
   }
 }
+
 
 export async function POST(request: NextRequest) {
   try {

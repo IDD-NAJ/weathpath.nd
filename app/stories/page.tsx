@@ -9,6 +9,8 @@ import { ArrowLeft, ArrowRight, Quote, TrendingUp } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
 
+export const dynamic = 'force-dynamic'
+
 export const metadata = {
   title: "Success Stories - WealthPath",
   description: "Real stories from people who built passive income. Read how everyday individuals achieved financial freedom through smart strategies.",

@@ -9,6 +9,9 @@ import {
   submitForApproval 
 } from "@/lib/content-manager"
 
+export const dynamic = 'force-dynamic'
+
+
 export async function POST(request: NextRequest) {
   try {
     const currentUser = await getCurrentUser()
@@ -53,6 +56,7 @@ export async function POST(request: NextRequest) {
     )
   }
 }
+
 
 export async function GET(request: NextRequest) {
   try {
@@ -144,6 +148,7 @@ export async function GET(request: NextRequest) {
   }
 }
 
+
 export async function PUT(request: NextRequest) {
   try {
     const currentUser = await getCurrentUser()
@@ -169,6 +174,7 @@ export async function PUT(request: NextRequest) {
     )
   }
 }
+
 
 export async function DELETE(request: NextRequest) {
   try {

@@ -8,6 +8,8 @@ import { Card, CardContent } from "@/components/ui/card"
 import { ArrowLeft, ArrowRight, BookOpen, TrendingUp } from "lucide-react"
 import Link from "next/link"
 
+export const dynamic = 'force-dynamic'
+
 export const metadata = {
   title: "Articles - WealthPath",
   description: "In-depth articles on building passive wealth, from investing basics to advanced income strategies.",

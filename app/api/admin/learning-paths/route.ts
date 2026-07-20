@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server"
 import { sql } from "@/lib/db"
 import { requireAdmin } from "@/lib/auth"
+export const dynamic = 'force-dynamic'
+
 
 export async function GET(request: NextRequest) {
   try {
@@ -36,6 +38,7 @@ export async function GET(request: NextRequest) {
   }
 }
 
+
 export async function POST(request: NextRequest) {
   try {
     const user = await requireAdmin()
@@ -65,6 +68,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Failed to create learning path' }, { status: 500 })
   }
 }
+
 
 export async function PUT(request: NextRequest) {
   try {
@@ -98,6 +102,7 @@ export async function PUT(request: NextRequest) {
     return NextResponse.json({ error: 'Failed to update learning path' }, { status: 500 })
   }
 }
+
 
 export async function DELETE(request: NextRequest) {
   try {

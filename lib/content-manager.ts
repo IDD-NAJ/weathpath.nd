@@ -1,7 +1,5 @@
-import { neon } from '@neondatabase/serverless'
+import { sql } from './db'
 import { v4 as uuidv4 } from 'uuid'
-
-const sql = neon(process.env.DATABASE_URL!)
 
 export interface ContentDraft {
   id: string

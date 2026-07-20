@@ -1,9 +1,20 @@
 import OpenAI from 'openai'
 import { findRelevantImage, downloadImage, generateImageFilename, PixabayImage } from './pixabay'
 
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-})
+let _openai: OpenAI | null = null
+
+function getOpenAI() {
+  if (!_openai) {
+    const apiKey = process.env.OPENAI_API_KEY
+    if (!apiKey) {
+      throw new Error(
+        "OPENAI_API_KEY environment variable is not set. Please ensure it's configured in your deployment environment."
+      )
+    }
+    _openai = new OpenAI({ apiKey })
+  }
+  return _openai
+}
 
 export interface ContentGenerationOptions {
   type: 'article' | 'story' | 'learning_path' | 'quiz'
@@ -39,7 +50,7 @@ export async function generateContent(options: ContentGenerationOptions): Promis
   try {
     const prompt = buildPrompt(options)
     
-    const completion = await openai.chat.completions.create({
+    const completion = await getOpenAI().chat.completions.create({
       model: "gpt-5.3-chat-latest",
       messages: [
         {
@@ -262,7 +273,7 @@ function parseGeneratedContent(response: string, options: ContentGenerationOptio
 
 export async function generateContentIdeas(topic: string, count: number = 5): Promise<string[]> {
   try {
-    const completion = await openai.chat.completions.create({
+    const completion = await getOpenAI().chat.completions.create({
       model: "gpt-5.3-chat-latest",
       messages: [
         {
@@ -323,7 +334,7 @@ function generateFallbackIdeas(topic: string, count: number): string[] {
 
 export async function improveContent(content: string, focus: string): Promise<string> {
   try {
-    const completion = await openai.chat.completions.create({
+    const completion = await getOpenAI().chat.completions.create({
       model: "gpt-5.3-chat-latest",
       messages: [
         {
@@ -348,7 +359,7 @@ export async function improveContent(content: string, focus: string): Promise<st
 
 export async function generateQuizQuestions(topic: string, difficulty: string, count: number = 10): Promise<any[]> {
   try {
-    const completion = await openai.chat.completions.create({
+    const completion = await getOpenAI().chat.completions.create({
       model: "gpt-5.3-chat-latest",
       messages: [
         {
