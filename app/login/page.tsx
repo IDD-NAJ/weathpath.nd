@@ -3,41 +3,14 @@
 import { useState } from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
-import { TrendingUp, Loader2, Eye, EyeOff, Mail, Lock, ArrowRight } from "lucide-react"
+import { Loader2, Mail, Lock, ArrowRight, ChevronRight } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
 import { Checkbox } from "@/components/ui/checkbox"
-import { Separator } from "@/components/ui/separator"
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card"
+import { AuthLayout } from "@/components/auth/auth-layout"
+import { FormField } from "@/components/auth/form-field"
 import { SimpleLayoutWrapper } from "@/components/layout-wrapper"
 
-function SocialButton({
-  icon,
-  label,
-}: {
-  icon: React.ReactNode
-  label: string
-}) {
-  return (
-    <Button
-      variant="outline"
-      className="w-full gap-2 py-5"
-      disabled
-      title="Coming soon"
-    >
-      {icon}
-      <span className="sr-only sm:not-sr-only sm:inline">{label}</span>
-    </Button>
-  )
-}
+
 
 export default function LoginPage() {
   const router = useRouter()
@@ -87,141 +60,86 @@ export default function LoginPage() {
 
   return (
     <SimpleLayoutWrapper showNavigation={false}>
-      <div className="flex min-h-screen flex-col items-center justify-center bg-background px-4 py-12">
-        <div className="w-full max-w-[420px]">
-          <div className="mb-8 flex flex-col items-center gap-3">
-            <Link href="/" className="flex items-center gap-2">
-              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary">
-                <TrendingUp className="h-5 w-5 text-primary-foreground" />
-              </div>
-              <span className="text-2xl font-bold tracking-tight text-foreground">
-                WealthPath
-              </span>
-            </Link>
+      <AuthLayout title="Welcome Back" subtitle="Sign in to your WealthPath account">
+        <form onSubmit={handleSubmit} className="space-y-6">
+          {error && (
+            <div
+              className="rounded-lg border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-600 animate-fade-up"
+              role="alert"
+            >
+              {error}
+            </div>
+          )}
+
+          <FormField
+            label="Email Address"
+            name="email"
+            type="email"
+            placeholder="you@example.com"
+            icon={<Mail size={18} />}
+            value={formData.email}
+            onChange={(e) => handleInputChange("email", e.target.value)}
+            required
+          />
+
+          <div className="animate-fade-up">
+            <div className="flex items-center justify-between mb-2">
+              <label htmlFor="password" className="block text-sm font-medium text-foreground">
+                Password
+              </label>
+              <Link
+                href="/forgot-password"
+                className="text-xs font-medium text-primary hover:text-primary/80 transition-colors"
+              >
+                Forgot password?
+              </Link>
+            </div>
+            <FormField
+              name="password"
+              type="password"
+              placeholder="Enter your password"
+              icon={<Lock size={18} />}
+              value={formData.password}
+              onChange={(e) => handleInputChange("password", e.target.value)}
+              required
+            />
           </div>
 
-          <Card>
-            <CardHeader className="items-center text-center pb-4">
-              <CardTitle className="text-2xl font-bold tracking-tight text-foreground">
+          <div className="flex items-center gap-3 animate-fade-up">
+            <Checkbox id="remember" name="remember" className="rounded" />
+            <label
+              htmlFor="remember"
+              className="text-sm text-muted-foreground cursor-pointer hover:text-foreground transition-colors"
+            >
+              Keep me signed in for 30 days
+            </label>
+          </div>
+
+          <Button
+            type="submit"
+            className="w-full gap-2 py-6 text-base font-semibold animate-fade-up"
+            disabled={isLoading}
+          >
+            {isLoading ? (
+              <Loader2 className="h-5 w-5 animate-spin" />
+            ) : (
+              <>
                 Sign In
-              </CardTitle>
-              <CardDescription>
-                Enter your credentials to access your account
-              </CardDescription>
-            </CardHeader>
+                <ArrowRight className="h-5 w-5" />
+              </>
+            )}
+          </Button>
+        </form>
 
-            <CardContent className="flex flex-col gap-6 px-0 pt-0 sm:px-6">
-              <div className="flex flex-col gap-3">
-                <SocialButton icon={<div className="h-5 w-5 rounded-sm bg-current" />} label="Continue with Google" />
-                <SocialButton icon={<div className="h-5 w-5 rounded-sm bg-current" />} label="Continue with GitHub" />
-              </div>
-
-              <div className="relative flex items-center gap-3 py-1">
-                <Separator className="flex-1" />
-                <span className="text-xs text-muted-foreground">or continue with email</span>
-                <Separator className="flex-1" />
-              </div>
-
-              <form onSubmit={handleSubmit}>
-                {error && (
-                  <div
-                    className="rounded-lg border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive mb-4"
-                    role="alert"
-                  >
-                    {error}
-                  </div>
-                )}
-                <div className="flex flex-col gap-2">
-                  <Label htmlFor="email">Email address</Label>
-                  <div className="relative">
-                    <Mail className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                    <Input
-                      id="email"
-                      name="email"
-                      type="email"
-                      placeholder="you@example.com"
-                      required
-                      autoComplete="email"
-                      className="pl-9"
-                      value={formData.email}
-                      onChange={(e) => handleInputChange("email", e.target.value)}
-                    />
-                  </div>
-                </div>
-
-                <div className="flex flex-col gap-2">
-                  <div className="flex items-center justify-between">
-                    <Label htmlFor="password">Password</Label>
-                    <Link
-                      href="/forgot-password"
-                      className="text-xs font-medium text-primary hover:underline"
-                    >
-                      Forgot password?
-                    </Link>
-                  </div>
-                  <div className="relative">
-                    <Lock className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                    <Input
-                      id="password"
-                      name="password"
-                      type={showPassword ? "text" : "password"}
-                      placeholder="Enter your password"
-                      required
-                      autoComplete="current-password"
-                      className="pl-9 pr-10"
-                      value={formData.password}
-                      onChange={(e) => handleInputChange("password", e.target.value)}
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground transition-colors hover:text-foreground"
-                      aria-label={showPassword ? "Hide password" : "Show password"}
-                    >
-                      {showPassword ? (
-                        <EyeOff className="h-4 w-4" />
-                      ) : (
-                        <Eye className="h-4 w-4" />
-                      )}
-                    </button>
-                  </div>
-                </div>
-
-                <div className="flex items-center gap-2">
-                  <Checkbox id="remember" name="remember" />
-                  <Label
-                    htmlFor="remember"
-                    className="text-sm font-normal text-muted-foreground"
-                  >
-                    Keep me signed in for 30 days
-                  </Label>
-                </div>
-
-                <Button type="submit" className="w-full gap-2 py-5" disabled={isLoading}>
-                  {isLoading ? (
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                  ) : (
-                    <ArrowRight className="h-4 w-4" />
-                  )}
-                  Sign In
-                </Button>
-              </form>
-            </CardContent>
-
-            <CardFooter className="flex flex-col gap-4 px-0 sm:px-6 pt-0">
-              <p className="text-center text-sm text-muted-foreground">
-                {"Don't have an account? "}
-                <Link
-                  href="/signup"
-                  className="font-medium text-primary hover:underline"
-                >
-                  Create one free
-                </Link>
-              </p>
-            </CardFooter>
-          </Card>
+        <div className="mt-6 pt-6 border-t border-border/50 text-center animate-fade-up">
+          <p className="text-sm text-muted-foreground">
+            {"Don't have an account? "}
+            <Link href="/signup" className="font-semibold text-primary hover:text-primary/80 transition-colors">
+              Create one free
+            </Link>
+          </p>
         </div>
-      </div>
+      </AuthLayout>
     </SimpleLayoutWrapper>
   )
 }
