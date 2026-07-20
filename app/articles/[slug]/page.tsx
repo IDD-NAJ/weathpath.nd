@@ -114,13 +114,48 @@ export default async function ArticleDetailPage({ params }: Props) {
           <AnimatedSection delay={200}>
             <Card className="border-border/60 bg-card">
               <CardContent className="p-8 md:p-10">
-                <div className="prose prose-lg max-w-none text-foreground">
+                <div className="prose prose-lg max-w-none text-foreground [&>h1]:text-3xl [&>h1]:font-bold [&>h1]:mt-8 [&>h1]:mb-4 [&>h1]:text-foreground [&>h2]:text-2xl [&>h2]:font-bold [&>h2]:mt-6 [&>h2]:mb-3 [&>h2]:text-foreground [&>h3]:text-xl [&>h3]:font-semibold [&>h3]:mt-5 [&>h3]:mb-2 [&>h3]:text-foreground [&>ul]:list-disc [&>ul]:pl-6 [&>li]:mb-2 [&>li]:text-foreground [&>li>strong]:font-semibold [&>strong]:font-semibold">
                   {article.content ? (
-                    article.content.split("\n\n").map((paragraph: string, i: number) => (
-                      <p key={i} className="mb-4 leading-relaxed text-foreground">
-                        {paragraph}
-                      </p>
-                    ))
+                    <div>
+                      {article.content.split(/(?:^|\n)(#{1,3}\s+.+)/).map((part: string, i: number) => {
+                        if (!part.trim()) return null;
+                        
+                        // Check if this is a heading
+                        if (part.startsWith('#')) {
+                          const match = part.match(/^(#{1,3})\s+(.+)$/);
+                          if (match) {
+                            const level = match[1].length;
+                            const text = match[2];
+                            const HeadingTag = `h${level}` as const;
+                            return <HeadingTag key={i} className={level === 1 ? "text-3xl" : level === 2 ? "text-2xl" : "text-xl"}>
+                              {text}
+                            </HeadingTag>;
+                          }
+                        }
+                        
+                        // Handle list items
+                        if (part.trim().startsWith('- ')) {
+                          const items = part.split('\n').filter(l => l.trim().startsWith('- ')).map(l => l.replace(/^-\s+/, ''));
+                          return (
+                            <ul key={i} className="list-disc pl-6 mb-4 space-y-2">
+                              {items.map((item, idx) => (
+                                <li key={idx}>{item}</li>
+                              ))}
+                            </ul>
+                          );
+                        }
+                        
+                        // Regular paragraphs
+                        if (part.trim()) {
+                          return (
+                            <p key={i} className="mb-4 leading-relaxed text-foreground">
+                              {part.trim()}
+                            </p>
+                          );
+                        }
+                        return null;
+                      }).filter(Boolean)}
+                    </div>
                   ) : (
                     <p className="text-muted-foreground">
                       This article is coming soon. Stay tuned for the full content.

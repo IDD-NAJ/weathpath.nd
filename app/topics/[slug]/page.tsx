@@ -35,12 +35,16 @@ export default async function TopicPage({ params }: Props) {
 
   let articles: any[] = []
   try {
+    // First, try to find articles linked via the topics table
     articles = await sql`
-      SELECT a.*, u.name as author_name FROM articles a
+      SELECT DISTINCT a.*, u.name as author_name 
+      FROM articles a
       LEFT JOIN users u ON a.author_id = u.id
+      LEFT JOIN article_topics at ON a.id = at.article_id
+      LEFT JOIN topics t ON at.topic_id = t.id
       WHERE a.is_published = true
         AND a.status = 'approved'
-        AND (a.category ILIKE ${topic.category} OR a.category ILIKE ${"%" + topic.category + "%"})
+        AND (t.slug = ${slug} OR a.category ILIKE ${topic.category})
       ORDER BY a.created_at DESC
       LIMIT 24
     `

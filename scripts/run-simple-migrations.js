@@ -1,9 +1,18 @@
+require('dotenv').config({ path: '.env.development.local' })
 require('dotenv').config({ path: '.env.local' })
 const { neon } = require('@neondatabase/serverless')
 const fs = require('fs')
 const path = require('path')
 
-const sql = neon(process.env.DATABASE_URL)
+// Also check the env var directly
+const dbUrl = process.env.DATABASE_URL || process.env.POSTGRES_URL
+if (!dbUrl) {
+  console.error('❌ No DATABASE_URL or POSTGRES_URL found in environment')
+  console.error('Available env vars:', Object.keys(process.env).filter(k => k.includes('DB') || k.includes('POSTGRES')))
+  process.exit(1)
+}
+
+const sql = neon(dbUrl)
 
 async function runSQLFile(filename) {
   try {
@@ -47,7 +56,9 @@ async function runAllMigrations() {
       '003-add-approval-workflow.sql',
       '004-create-users-fixed.sql',
       '005-add-enhanced-features.sql',
-      '006-add-profile-photos.sql'
+      '006-add-profile-photos.sql',
+      '011-create-topics-table.sql',
+      '012-seed-articles-topics.sql'
     ]
     
     for (const migration of migrations) {
