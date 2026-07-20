@@ -327,9 +327,12 @@ export function AIContentGenerator() {
 
   const getTypeIcon = (type: string) => {
     switch (type) {
-      case "article": return FileText
+      case "article":
+      case "article_research": return FileText
       case "story": return Trophy
-      case "learning_path": return BookOpen
+      case "learning_path":
+      case "learning_path_research": return BookOpen
+      case "case_study": return Target
       case "quiz": return Brain
       default: return FileText
     }
@@ -338,8 +341,11 @@ export function AIContentGenerator() {
   const getTypeColor = (type: string) => {
     switch (type) {
       case "article": return "bg-blue-500"
+      case "article_research": return "bg-cyan-500"
       case "story": return "bg-green-500"
       case "learning_path": return "bg-purple-500"
+      case "learning_path_research": return "bg-indigo-500"
+      case "case_study": return "bg-emerald-500"
       case "quiz": return "bg-orange-500"
       default: return "bg-gray-500"
     }
@@ -354,7 +360,7 @@ export function AIContentGenerator() {
             AI Content Generator
           </CardTitle>
           <CardDescription>
-            Generate articles, stories, learning paths, and quizzes using AI
+            Generate articles, stories, learning paths, and quizzes using AI. Choose research-backed options for detailed, data-driven content with citations and expert insights.
           </CardDescription>
         </CardHeader>
       </AnimatedCard>
@@ -380,7 +386,13 @@ export function AIContentGenerator() {
                     <SelectItem value="article">
                       <div className="flex items-center gap-2">
                         <FileText className="h-4 w-4" />
-                        Article
+                        Article (Standard)
+                      </div>
+                    </SelectItem>
+                    <SelectItem value="article_research">
+                      <div className="flex items-center gap-2">
+                        <Sparkles className="h-4 w-4 text-blue-500" />
+                        Article (Research-Backed)
                       </div>
                     </SelectItem>
                     <SelectItem value="story">
@@ -393,6 +405,18 @@ export function AIContentGenerator() {
                       <div className="flex items-center gap-2">
                         <BookOpen className="h-4 w-4" />
                         Learning Path
+                      </div>
+                    </SelectItem>
+                    <SelectItem value="learning_path_research">
+                      <div className="flex items-center gap-2">
+                        <Sparkles className="h-4 w-4 text-purple-500" />
+                        Learning Path (Data-Driven)
+                      </div>
+                    </SelectItem>
+                    <SelectItem value="case_study">
+                      <div className="flex items-center gap-2">
+                        <Target className="h-4 w-4 text-green-500" />
+                        Case Study (Research-Based)
                       </div>
                     </SelectItem>
                     <SelectItem value="quiz">

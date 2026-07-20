@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
 import { getCurrentUser } from "@/lib/auth"
 import { generateContent, generateContentIdeas, improveContent, generateQuizQuestions, generateDetailedStory } from "@/lib/openai"
+import { generateResearchedArticle, generateDataDrivenLearningPath, generateDataDrivenCaseStudy } from "@/lib/research-content"
 export const dynamic = 'force-dynamic'
 
 export async function POST(request: NextRequest) {
@@ -28,9 +29,20 @@ export async function POST(request: NextRequest) {
 
     switch (action) {
       case 'generate':
-        // Use specialized story generator for stories
+        // Route to specialized generators based on content type
         if (params.type === 'story') {
           result = await generateDetailedStory(params)
+        } else if (params.type === 'article_research') {
+          result = await generateResearchedArticle(params.topic, {
+            subtopics: params.subtopics,
+            includeStatistics: true,
+            includeExpertInsights: true,
+            wordCount: params.length === 'short' ? 1500 : params.length === 'long' ? 3000 : 2500
+          })
+        } else if (params.type === 'learning_path_research') {
+          result = await generateDataDrivenLearningPath(params.topic, params.audience || 'general')
+        } else if (params.type === 'case_study') {
+          result = await generateDataDrivenCaseStudy(params.topic, params.context || '')
         } else {
           result = await generateContent(params)
         }

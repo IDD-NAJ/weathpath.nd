@@ -241,7 +241,19 @@ function buildPrompt(options: ContentGenerationOptions): string {
   }
 
   const typeInstructions = {
-    article: `Write an educational article about ${topic}. Include a compelling introduction, 3-4 main sections with clear headings, practical examples, and a conclusion with key takeaways.`,
+    article: `Write an EXTENSIVELY RESEARCHED AND DETAILED article about ${topic}. 
+    CRITICAL: Include specific data, statistics, research citations, and expert insights.
+    Structure:
+    - Compelling introduction with market context
+    - 4-5 detailed sections with subsections
+    - Include at least 5-7 specific data points or statistics with sources
+    - Reference industry experts or thought leaders
+    - Include real-world case studies or examples
+    - Each section should have: concept explanation, data support, real applications, expert insight, actionable takeaways
+    - Conclusion with future implications and key learnings
+    Length: 2000+ words of substantive, research-backed content
+    Tone: Professional, authoritative, data-driven yet accessible
+    Include specific numbers, percentages, growth rates, and attributed sources throughout.`,
     story: `Write a detailed, inspirational success story about someone who achieved financial success related to ${topic}. Structure it as follows:
     - WHO: Full character details (profession, age range, background, challenges)
     - BEFORE: Specific financial situation before (numbers, struggles, mindset)
@@ -252,8 +264,24 @@ function buildPrompt(options: ContentGenerationOptions): string {
     - ADVICE: Specific actionable tips they would give others
     - IMPACT: How this changed their life beyond finances
     Make it extremely detailed, specific, relatable, and motivating with real-world scenarios.`,
-    learning_path: `Create a structured learning path about ${topic}. Break it down into 5-6 progressive modules, each with clear objectives, key concepts, practical exercises, and real-world applications.`,
-    quiz: `Create a comprehensive quiz about ${topic}. Include 10-15 questions with multiple choice answers, explanations for each answer, and a scoring system.`
+    learning_path: `Create a COMPREHENSIVE, DATA-DRIVEN learning path about ${topic}. Break it down into 6-8 progressive modules with:
+    - Clear, measurable learning objectives
+    - Key concepts supported by research and real data
+    - Industry statistics and market trends
+    - Real-world case studies showing outcomes
+    - Practical exercises based on professional scenarios
+    - Resources and recommended readings from experts
+    - Assessment questions and reflection exercises
+    Include specific industry benchmarks, success metrics, and expert-backed best practices throughout.`,
+    quiz: `Create a COMPREHENSIVE, RESEARCH-BASED quiz about ${topic}. Include:
+    - 12-15 questions of varying difficulty (beginner to advanced)
+    - Each question based on real industry data, best practices, or case studies
+    - Multiple choice answers with clear correct/incorrect distinctions
+    - Detailed explanations for each answer citing relevant concepts
+    - Statistical or data context for questions
+    - Industry application scenarios
+    - Scoring rubric with performance interpretation
+    - References to resources for further learning`
   }
 
   return `
