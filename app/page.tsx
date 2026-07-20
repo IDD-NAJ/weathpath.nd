@@ -5,6 +5,7 @@ import { FeaturesSection } from "@/components/features-section"
 import { LearningPaths } from "@/components/learning-paths"
 import { IncomeQuiz } from "@/components/income-quiz"
 import { CompoundCalculator } from "@/components/compound-calculator"
+import { CourseStoreSection } from "@/components/course-store-section"
 import { StatisticsSection } from "@/components/statistics-section"
 import { SuccessStories } from "@/components/success-stories"
 import { FAQSection } from "@/components/faq-section"
@@ -28,6 +29,7 @@ export default async function Page() {
         <LearningPaths />
         <IncomeQuiz />
         <CompoundCalculator />
+        <CourseStoreSection />
         <StatisticsSection />
         <SuccessStories />
         <FAQSection />
