@@ -3,6 +3,10 @@
 
 @custom-variant dark (&:is(.dark *));
 
+html {
+  zoom: 0.95;
+}
+
 :root {
   /* ─── Neutral Base – warm cream (JSTOR) ─── */
   --background: oklch(0.966 0.008 85);
