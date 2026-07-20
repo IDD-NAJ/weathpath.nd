@@ -1,28 +1,11 @@
 import { NextResponse } from "next/server"
 import type { NextRequest } from "next/server"
-import { sql } from "@/lib/db"
 
 const protectedRoutes = ["/dashboard"]
 const adminRoutes = ["/admin"]
 const authRoutes = ["/login", "/signup"]
 
-async function getUserFromSession(sessionId: string) {
-  try {
-    const rows = await sql`
-      SELECT u.id, u.email, u.name, u.role, u.is_active
-      FROM users u
-      INNER JOIN sessions s ON s.user_id = u.id
-      WHERE s.id = ${sessionId}
-        AND s.expires_at > NOW()
-        AND u.is_active = true
-    `
-    return rows.length > 0 ? rows[0] : null
-  } catch {
-    return null
-  }
-}
-
-export async function middleware(request: NextRequest) {
+export function middleware(request: NextRequest) {
   const sessionCookie = request.cookies.get("wp_session")?.value
   const { pathname } = request.nextUrl
 
@@ -47,17 +30,6 @@ export async function middleware(request: NextRequest) {
     const url = request.nextUrl.clone()
     url.pathname = "/dashboard"
     return NextResponse.redirect(url)
-  }
-
-  // Check admin routes for proper role
-  if (isAdminRoute && sessionCookie) {
-    const user = await getUserFromSession(sessionCookie)
-    
-    if (!user || user.role !== "admin") {
-      const url = request.nextUrl.clone()
-      url.pathname = "/dashboard"
-      return NextResponse.redirect(url)
-    }
   }
 
   return NextResponse.next()
