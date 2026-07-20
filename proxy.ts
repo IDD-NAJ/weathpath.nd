@@ -5,7 +5,7 @@ const protectedRoutes = ["/dashboard"]
 const adminRoutes = ["/admin"]
 const authRoutes = ["/login", "/signup"]
 
-export function middleware(request: NextRequest) {
+export function proxy(request: NextRequest) {
   const sessionCookie = request.cookies.get("wp_session")?.value
   const { pathname } = request.nextUrl
 
