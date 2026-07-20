@@ -34,16 +34,6 @@ export function HeroSection() {
       <div className="pointer-events-none absolute -top-24 left-1/2 -z-10 h-[500px] w-[900px] -translate-x-1/2 rounded-full bg-primary/6 blur-3xl" />
 
       <div className="mx-auto max-w-5xl">
-        {/* Badge */}
-        <div className="flex justify-center animate-fade-up">
-          <div className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/5 px-4 py-1.5">
-            <span className="h-2 w-2 rounded-full bg-primary animate-pulse" />
-            <span className="text-xs font-semibold uppercase tracking-wider text-primary">
-              Financial education for everyone
-            </span>
-          </div>
-        </div>
-
         {/* Headline */}
         <h1 className="mt-6 text-center font-serif text-4xl font-normal leading-editorial tracking-tight text-foreground text-balance animate-fade-up-delay-1 md:text-6xl md:leading-[1.15]">
           Build Real Wealth

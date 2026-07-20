@@ -67,9 +67,6 @@ export function LearningPaths() {
       <div className="mx-auto max-w-7xl">
         <AnimatedSection className="mb-14 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
           <div>
-            <p className="mb-3 text-xs font-semibold uppercase tracking-widest text-primary">
-              Topic Hubs
-            </p>
             <h2 className="font-serif text-3xl leading-tight text-foreground md:text-4xl text-balance max-w-lg">
               Pick the income strategy that fits your life
             </h2>

@@ -53,9 +53,6 @@ export function ResourcesSection() {
     <section id="resources" className="scroll-mt-20 border-y border-border bg-card px-6 py-20 md:py-28">
       <div className="mx-auto max-w-6xl">
         <AnimatedSection className="mb-16 text-center">
-          <p className="mb-3 text-sm font-semibold uppercase tracking-widest text-primary">
-            Curated Resources
-          </p>
           <h2 className="mx-auto max-w-xl font-serif text-3xl leading-tight text-foreground md:text-4xl">
             Keep learning beyond WealthPath
           </h2>

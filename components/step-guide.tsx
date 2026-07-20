@@ -48,9 +48,6 @@ export function StepGuide() {
     <section id="guide" className="scroll-mt-20 px-6 py-20 md:py-28">
       <div className="mx-auto max-w-6xl">
         <AnimatedSection className="mb-16 text-center">
-          <p className="mb-3 text-sm font-semibold uppercase tracking-widest text-primary">
-            Your Roadmap
-          </p>
           <h2 className="mx-auto max-w-xl font-serif text-3xl leading-tight text-foreground md:text-4xl">
             Four steps from curious to confident
           </h2>

@@ -153,9 +153,6 @@ export function IncomeQuiz() {
     <section id="quiz" className="scroll-mt-20 px-6 py-20 md:py-28">
       <div className="mx-auto max-w-2xl">
         <AnimatedSection className="mb-12 text-center">
-          <p className="mb-3 text-sm font-semibold uppercase tracking-widest text-primary">
-            Interactive Quiz
-          </p>
           <h2 className="font-serif text-3xl leading-tight text-foreground md:text-4xl">
             Find your ideal starting point
           </h2>

@@ -35,9 +35,6 @@ export function FeaturesSection() {
     <section className="px-6 py-20 md:py-24 bg-surface-1">
       <div className="mx-auto max-w-7xl">
         <AnimatedSection className="mb-14 text-center">
-          <p className="mb-3 text-xs font-semibold uppercase tracking-widest text-primary">
-            Why WealthPath
-          </p>
           <h2 className="mx-auto max-w-xl font-serif text-3xl leading-tight text-foreground md:text-4xl text-balance">
             Education you can trust and actually use
           </h2>

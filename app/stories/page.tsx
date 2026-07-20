@@ -34,7 +34,6 @@ export default async function StoriesPage() {
         <section className="border-b border-border bg-surface-1 px-6 py-16 md:py-20">
           <div className="mx-auto max-w-7xl">
             <AnimatedSection>
-              <p className="mb-3 text-xs font-semibold uppercase tracking-widest text-primary">Community</p>
               <h1 className="font-serif text-4xl leading-tight text-foreground md:text-5xl text-balance max-w-2xl">
                 Real Stories, Real Results
               </h1>
