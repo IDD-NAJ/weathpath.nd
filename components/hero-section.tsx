@@ -1,77 +1,99 @@
 "use client"
 
-import { ArrowRight, BookOpen, Calculator, Users } from "lucide-react"
+import Link from "next/link"
+import { ArrowRight, Plane, Code2, Bitcoin, ShoppingBag, BarChart3, Zap } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { AnimatedSection, StaggerChildren } from "@/components/animated-section"
+
+const topics = [
+  { label: "Travel", href: "/topics/travel", icon: Plane, color: "bg-blue-50 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400" },
+  { label: "Coding", href: "/topics/coding", icon: Code2, color: "bg-violet-50 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400" },
+  { label: "Bitcoin", href: "/topics/bitcoin", icon: Bitcoin, color: "bg-amber-50 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400" },
+  { label: "Dropshipping", href: "/topics/dropshipping", icon: ShoppingBag, color: "bg-emerald-50 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400" },
+  { label: "Investing", href: "/topics/investing", icon: BarChart3, color: "bg-primary/10 text-primary" },
+  { label: "Side Hustles", href: "/topics/side-hustles", icon: Zap, color: "bg-purple-50 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400" },
+]
 
 const stats = [
-  { icon: BookOpen, value: "12", label: "Learning Paths" },
-  { icon: Calculator, value: "5", label: "Interactive Tools" },
-  { icon: Users, value: "2,400+", label: "Community Members" },
+  { value: "6", label: "Topic Hubs" },
+  { value: "50+", label: "Articles" },
+  { value: "2,400+", label: "Members" },
 ]
 
 export function HeroSection() {
   return (
-    <section className="relative overflow-hidden px-6 pb-20 pt-16 md:pb-28 md:pt-24">
-      <div className="pointer-events-none absolute inset-0 -z-10">
-        <div className="absolute right-0 top-0 h-[500px] w-[500px] rounded-full bg-primary/5 blur-3xl" />
-        <div className="absolute bottom-0 left-0 h-[400px] w-[400px] rounded-full bg-accent/10 blur-3xl" />
-      </div>
+    <section className="relative overflow-hidden px-6 pb-20 pt-14 md:pb-28 md:pt-20">
+      {/* Subtle grid background */}
+      <div
+        className="pointer-events-none absolute inset-0 -z-10 opacity-[0.03] dark:opacity-[0.05]"
+        style={{
+          backgroundImage: `linear-gradient(var(--foreground) 1px, transparent 1px), linear-gradient(90deg, var(--foreground) 1px, transparent 1px)`,
+          backgroundSize: "48px 48px",
+        }}
+      />
+      {/* Soft radial glow */}
+      <div className="pointer-events-none absolute -top-24 left-1/2 -z-10 h-[500px] w-[900px] -translate-x-1/2 rounded-full bg-primary/6 blur-3xl" />
 
-      <div className="mx-auto max-w-6xl">
-        <div className="flex flex-col items-center text-center">
-          <AnimatedSection delay={0} direction="down">
-            <div className="mb-8 inline-flex items-center gap-2 rounded-full border border-border bg-card px-4 py-1.5">
-              <span className="h-2 w-2 rounded-full bg-primary" />
-              <span className="text-sm font-medium text-muted-foreground">
-                Your journey to financial freedom starts here
-              </span>
+      <div className="mx-auto max-w-5xl">
+        {/* Badge */}
+        <div className="flex justify-center animate-fade-up">
+          <div className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/5 px-4 py-1.5">
+            <span className="h-2 w-2 rounded-full bg-primary animate-pulse" />
+            <span className="text-xs font-semibold uppercase tracking-wider text-primary">
+              Financial education for everyone
+            </span>
+          </div>
+        </div>
+
+        {/* Headline */}
+        <h1 className="mt-6 text-center font-serif text-4xl font-normal leading-editorial tracking-tight text-foreground text-balance animate-fade-up-delay-1 md:text-6xl md:leading-[1.15]">
+          Build Real Wealth
+          <br />
+          <span className="text-primary">One Income Stream</span>
+          <br />
+          at a Time
+        </h1>
+
+        {/* Sub-copy */}
+        <p className="mx-auto mt-6 max-w-2xl text-center text-base leading-relaxed text-muted-foreground text-pretty animate-fade-up-delay-2 md:text-lg">
+          From travel content and coding to crypto and dropshipping — explore honest,
+          practical guides on building income that works for you.
+        </p>
+
+        {/* CTAs */}
+        <div className="mt-9 flex flex-col items-center justify-center gap-3 animate-fade-up-delay-3 sm:flex-row">
+          <Button size="lg" className="rounded-xl px-6 gap-2" asChild>
+            <Link href="/articles">
+              Start Exploring
+              <ArrowRight className="h-4 w-4" />
+            </Link>
+          </Button>
+          <Button variant="outline" size="lg" className="rounded-xl px-6" asChild>
+            <Link href="/signup">Join Free</Link>
+          </Button>
+        </div>
+
+        {/* Topic pills */}
+        <div className="mt-12 flex flex-wrap items-center justify-center gap-2.5 animate-fade-up-delay-4">
+          {topics.map((t) => (
+            <Link
+              key={t.href}
+              href={t.href}
+              className={`flex items-center gap-2 rounded-full px-4 py-2 text-sm font-medium transition-all duration-200 hover:scale-105 hover:shadow-sm ${t.color}`}
+            >
+              <t.icon className="h-3.5 w-3.5" />
+              {t.label}
+            </Link>
+          ))}
+        </div>
+
+        {/* Stats */}
+        <div className="mt-14 flex flex-wrap items-center justify-center gap-10 border-t border-border pt-10 animate-fade-up-delay-4">
+          {stats.map((s) => (
+            <div key={s.label} className="text-center">
+              <p className="text-3xl font-bold text-foreground">{s.value}</p>
+              <p className="mt-0.5 text-sm text-muted-foreground">{s.label}</p>
             </div>
-          </AnimatedSection>
-
-          <AnimatedSection delay={100}>
-            <h1 className="max-w-3xl text-balance font-serif text-4xl font-normal leading-tight tracking-tight text-foreground md:text-6xl md:leading-tight">
-              Build Lasting Wealth Through Passive Income
-            </h1>
-          </AnimatedSection>
-
-          <AnimatedSection delay={200}>
-            <p className="mt-6 max-w-2xl text-pretty text-lg leading-relaxed text-muted-foreground md:text-xl">
-              Clear, honest education on creating income streams that work for you.
-              No jargon, no hype — just practical knowledge and the tools to put it
-              into action.
-            </p>
-          </AnimatedSection>
-
-          <AnimatedSection delay={300}>
-            <div className="mt-10 flex flex-col gap-4 sm:flex-row">
-              <Button size="lg" asChild>
-                <a href="#quiz" className="gap-2">
-                  Find Your Starting Point
-                  <ArrowRight className="h-4 w-4" />
-                </a>
-              </Button>
-              <Button variant="outline" size="lg" asChild>
-                <a href="#learn">Explore Learning Paths</a>
-              </Button>
-            </div>
-          </AnimatedSection>
-
-          <AnimatedSection delay={450}>
-            <div className="mt-16 flex flex-wrap items-center justify-center gap-8 md:gap-16">
-              {stats.map((stat) => (
-                <div key={stat.label} className="flex items-center gap-3">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
-                    <stat.icon className="h-5 w-5 text-primary" />
-                  </div>
-                  <div className="text-left">
-                    <p className="text-xl font-bold text-foreground">{stat.value}</p>
-                    <p className="text-sm text-muted-foreground">{stat.label}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </AnimatedSection>
+          ))}
         </div>
       </div>
     </section>

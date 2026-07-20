@@ -1,25 +1,20 @@
 "use client"
 
-import {
-  Lightbulb,
-  Target,
-  Repeat,
-  ShieldCheck,
-} from "lucide-react"
-import { AnimatedSection, StaggerChildren } from "@/components/animated-section"
+import { Lightbulb, Target, Repeat, ShieldCheck } from "lucide-react"
+import { AnimatedSection, AnimatedItem } from "@/components/animated-section"
 
 const features = [
   {
     icon: Lightbulb,
     title: "Plain-Language Education",
     description:
-      "Every concept is explained clearly, without jargon. You will understand what you are learning, why it matters, and how to apply it to your own situation.",
+      "Every concept explained clearly, without jargon. You will understand what you are learning and exactly how to apply it.",
   },
   {
     icon: Target,
     title: "Personalized Roadmaps",
     description:
-      "After a short assessment, receive a custom plan that matches your current knowledge, financial situation, and personal goals.",
+      "A short quiz matches you with a custom plan based on your knowledge, situation, and financial goals.",
   },
   {
     icon: Repeat,
@@ -31,41 +26,40 @@ const features = [
     icon: ShieldCheck,
     title: "Honest & Balanced",
     description:
-      "We present the real trade-offs, not just the upside. Every strategy includes a candid look at the risks, time, and effort involved.",
+      "Real trade-offs, not just the upside. Every strategy includes a candid look at the risks, time, and effort involved.",
   },
 ]
 
 export function FeaturesSection() {
   return (
-    <section className="border-y border-border bg-card px-6 py-20 md:py-28">
-      <div className="mx-auto max-w-6xl">
-        <AnimatedSection className="mb-16 text-center">
-          <p className="mb-3 text-sm font-semibold uppercase tracking-widest text-primary">
+    <section className="px-6 py-20 md:py-24 bg-surface-1">
+      <div className="mx-auto max-w-7xl">
+        <AnimatedSection className="mb-14 text-center">
+          <p className="mb-3 text-xs font-semibold uppercase tracking-widest text-primary">
             Why WealthPath
           </p>
-          <h2 className="mx-auto max-w-xl font-serif text-3xl leading-tight text-foreground md:text-4xl">
+          <h2 className="mx-auto max-w-xl font-serif text-3xl leading-tight text-foreground md:text-4xl text-balance">
             Education you can trust and actually use
           </h2>
         </AnimatedSection>
 
-        <StaggerChildren
-          className="grid gap-10 md:grid-cols-2 lg:grid-cols-4"
-          staggerMs={120}
-        >
-          {features.map((feature) => (
-            <div key={feature.title} className="flex flex-col items-start">
-              <div className="mb-5 flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10">
-                <feature.icon className="h-6 w-6 text-primary" />
+        <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
+          {features.map((feature, i) => (
+            <AnimatedItem key={feature.title} index={i} className="group">
+              <div className="flex flex-col h-full rounded-2xl border border-border bg-card p-7 transition-all duration-200 hover:border-primary/30 hover:shadow-md hover:-translate-y-1">
+                <div className="mb-5 flex h-12 w-12 items-center justify-center rounded-xl bg-primary/8 transition-colors group-hover:bg-primary/15">
+                  <feature.icon className="h-6 w-6 text-primary" />
+                </div>
+                <h3 className="mb-2.5 text-[15px] font-semibold text-foreground">
+                  {feature.title}
+                </h3>
+                <p className="text-sm leading-relaxed text-muted-foreground">
+                  {feature.description}
+                </p>
               </div>
-              <h3 className="mb-2 text-base font-semibold text-foreground">
-                {feature.title}
-              </h3>
-              <p className="text-sm leading-relaxed text-muted-foreground">
-                {feature.description}
-              </p>
-            </div>
+            </AnimatedItem>
           ))}
-        </StaggerChildren>
+        </div>
       </div>
     </section>
   )

@@ -1,223 +1,111 @@
 "use client"
 
-import { useState, useEffect } from "react"
-import {
-  Building2,
-  Coins,
-  PenTool,
-  BarChart3,
-  Globe,
-  ShieldCheck,
-  ArrowRight,
-  Clock,
-  BookOpen,
-} from "lucide-react"
-import { Badge } from "@/components/ui/badge"
-import { AnimatedSection, StaggerChildren } from "@/components/animated-section"
-import useSWR from "swr"
+import Link from "next/link"
+import { Plane, Code2, Bitcoin, ShoppingBag, BarChart3, Zap, ArrowRight } from "lucide-react"
+import { AnimatedSection, AnimatedItem } from "@/components/animated-section"
 
-interface LearningPath {
-  id: string
-  title: string
-  description: string
-  level: string
-  duration: string
-  module_count: number
-  topics: string[]
-  is_published: boolean
-  created_at: string
-  updated_at: string
-}
-
-const iconMap: Record<string, any> = {
-  "Real Estate Income": Building2,
-  "Dividend Investing": BarChart3,
-  "Digital Products": PenTool,
-  "Online Business Models": Globe,
-  "Interest & Lending": Coins,
-  "Risk Management": ShieldCheck,
-}
-
-const fetcher = (url: string) => fetch(url).then((r) => r.json())
-
-const fallbackPaths: LearningPath[] = [
+const paths = [
   {
-    id: "fallback-1",
-    title: "Real Estate Income",
-    description: "Understand how property ownership, rental income, and real estate funds can create steady cash flow without daily involvement.",
-    level: "Beginner",
-    duration: "4 weeks",
-    module_count: 8,
-    topics: ["Rental properties", "REITs", "Crowdfunding platforms", "Property management"],
-    is_published: true,
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
+    icon: Plane,
+    title: "Travel Content",
+    href: "/topics/travel",
+    description: "Monetize travel blogs, YouTube channels, and social content while exploring the world.",
+    tag: "Creator Economy",
+    accent: "bg-blue-50 border-blue-100 text-blue-700 dark:bg-blue-900/20 dark:border-blue-800 dark:text-blue-300",
+    iconBg: "bg-blue-100 text-blue-600 dark:bg-blue-900/40 dark:text-blue-400",
   },
   {
-    id: "fallback-2",
-    title: "Dividend Investing",
-    description: "Learn how owning shares in established companies can provide regular income payments, and how to build a balanced portfolio over time.",
-    level: "Beginner",
-    duration: "3 weeks",
-    module_count: 6,
-    topics: ["Dividend stocks", "Index funds", "Reinvestment strategies", "Portfolio balancing"],
-    is_published: true,
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
+    icon: Code2,
+    title: "Coding & Tech",
+    href: "/topics/coding",
+    description: "Build SaaS products, sell dev services, or earn from open source — skills that scale.",
+    tag: "High Leverage",
+    accent: "bg-violet-50 border-violet-100 text-violet-700 dark:bg-violet-900/20 dark:border-violet-800 dark:text-violet-300",
+    iconBg: "bg-violet-100 text-violet-600 dark:bg-violet-900/40 dark:text-violet-400",
   },
   {
-    id: "fallback-3",
-    title: "Digital Products",
-    description: "Discover how to create valuable content once — like courses, templates, or ebooks — and earn from it repeatedly.",
-    level: "Intermediate",
-    duration: "5 weeks",
-    module_count: 10,
-    topics: ["Online courses", "Ebooks", "Templates", "Licensing"],
-    is_published: true,
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
+    icon: Bitcoin,
+    title: "Bitcoin & Crypto",
+    href: "/topics/bitcoin",
+    description: "Navigate digital assets, DeFi, and long-term holding strategies with clarity.",
+    tag: "Emerging Assets",
+    accent: "bg-amber-50 border-amber-100 text-amber-700 dark:bg-amber-900/20 dark:border-amber-800 dark:text-amber-300",
+    iconBg: "bg-amber-100 text-amber-600 dark:bg-amber-900/40 dark:text-amber-400",
   },
   {
-    id: "fallback-4",
-    title: "Online Business Models",
-    description: "Explore business structures designed to generate income with minimal day-to-day management, from affiliate sites to automated services.",
-    level: "Intermediate",
-    duration: "5 weeks",
-    module_count: 9,
-    topics: ["Affiliate marketing", "Print on demand", "SaaS basics", "Automation"],
-    is_published: true,
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
+    icon: ShoppingBag,
+    title: "Dropshipping",
+    href: "/topics/dropshipping",
+    description: "Launch a product business without holding inventory — lean, testable, and scalable.",
+    tag: "E-Commerce",
+    accent: "bg-emerald-50 border-emerald-100 text-emerald-700 dark:bg-emerald-900/20 dark:border-emerald-800 dark:text-emerald-300",
+    iconBg: "bg-emerald-100 text-emerald-600 dark:bg-emerald-900/40 dark:text-emerald-400",
   },
   {
-    id: "fallback-5",
-    title: "Interest & Lending",
-    description: "Learn about savings vehicles, bonds, and peer-to-peer lending that let your money work for you safely and predictably.",
-    level: "Beginner",
-    duration: "2 weeks",
-    module_count: 5,
-    topics: ["High-yield savings", "Bonds", "Peer-to-peer lending", "CDs & money markets"],
-    is_published: true,
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
+    icon: BarChart3,
+    title: "Investing",
+    href: "/topics/investing",
+    description: "Stocks, index funds, dividends, and real estate — build long-term compounding wealth.",
+    tag: "Long-Term Wealth",
+    accent: "bg-primary/5 border-primary/15 text-primary",
+    iconBg: "bg-primary/10 text-primary",
   },
   {
-    id: "fallback-6",
-    title: "Risk Management",
-    description: "Every income stream comes with trade-offs. Learn to evaluate, protect, and diversify so your wealth grows steadily.",
-    level: "Advanced",
-    duration: "3 weeks",
-    module_count: 7,
-    topics: ["Diversification", "Tax planning", "Insurance", "Emergency funds"],
-    is_published: true,
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
+    icon: Zap,
+    title: "Side Hustles",
+    href: "/topics/side-hustles",
+    description: "Freelancing, consulting, reselling — real ways to earn extra income starting this week.",
+    tag: "Quick Wins",
+    accent: "bg-purple-50 border-purple-100 text-purple-700 dark:bg-purple-900/20 dark:border-purple-800 dark:text-purple-300",
+    iconBg: "bg-purple-100 text-purple-600 dark:bg-purple-900/40 dark:text-purple-400",
   },
 ]
 
-const levelColors: Record<string, string> = {
-  Beginner: "bg-primary/10 text-primary",
-  Intermediate: "bg-accent/20 text-accent-foreground",
-  Advanced: "bg-foreground/10 text-foreground",
-}
-
 export function LearningPaths() {
-  const [expanded, setExpanded] = useState<number | null>(null)
-  const { data } = useSWR<{ learningPaths: LearningPath[] }>("/api/learning-paths", fetcher)
-  const paths = data?.learningPaths?.length ? data.learningPaths : fallbackPaths
-
   return (
     <section id="learn" className="scroll-mt-20 px-6 py-20 md:py-28">
-      <div className="mx-auto max-w-6xl">
-        <AnimatedSection className="mb-16 max-w-2xl">
-          <p className="mb-3 text-sm font-semibold uppercase tracking-widest text-primary">
-            Learning Paths
-          </p>
-          <h2 className="font-serif text-3xl leading-tight text-foreground md:text-4xl">
-            Choose the path that fits your goals
-          </h2>
-          <p className="mt-4 text-lg leading-relaxed text-muted-foreground">
-            Each path is designed as a self-paced journey — start from the
-            basics, build real understanding, and move at your own speed.
-          </p>
+      <div className="mx-auto max-w-7xl">
+        <AnimatedSection className="mb-14 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+          <div>
+            <p className="mb-3 text-xs font-semibold uppercase tracking-widest text-primary">
+              Topic Hubs
+            </p>
+            <h2 className="font-serif text-3xl leading-tight text-foreground md:text-4xl text-balance max-w-lg">
+              Pick the income strategy that fits your life
+            </h2>
+          </div>
+          <Link
+            href="/articles"
+            className="flex items-center gap-1.5 text-sm font-medium text-primary hover:underline underline-offset-4 whitespace-nowrap self-start md:self-end"
+          >
+            View all articles <ArrowRight className="h-3.5 w-3.5" />
+          </Link>
         </AnimatedSection>
 
-        <StaggerChildren
-          className="grid gap-6 md:grid-cols-2 lg:grid-cols-3"
-          staggerMs={100}
-        >
-          {paths.map((path, index) => {
-            const isExpanded = expanded === index
-            const Icon = iconMap[path.title] || Building2
-            
-            return (
-              <article
-                key={path.id}
-                className="group flex flex-col rounded-xl border border-border bg-card p-6 transition-all hover:border-primary/30 hover:shadow-sm"
+        <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+          {paths.map((path, i) => (
+            <AnimatedItem key={path.href} index={i}>
+              <Link
+                href={path.href}
+                className="group flex h-full flex-col rounded-2xl border border-border bg-card p-6 transition-all duration-200 hover:border-primary/30 hover:shadow-lg hover:-translate-y-1 card-lift"
               >
-                <div className="mb-4 flex items-start justify-between">
-                  <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-primary/10">
-                    <Icon className="h-6 w-6 text-primary" />
+                <div className="mb-4 flex items-center justify-between">
+                  <div className={`flex h-11 w-11 items-center justify-center rounded-xl ${path.iconBg}`}>
+                    <path.icon className="h-5 w-5" />
                   </div>
-                  <span
-                    className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-medium ${levelColors[path.level]}`}
-                  >
-                    {path.level}
+                  <span className={`rounded-full border px-3 py-0.5 text-xs font-medium ${path.accent}`}>
+                    {path.tag}
                   </span>
                 </div>
-
-                <h3 className="mb-2 text-lg font-semibold text-foreground">
-                  {path.title}
-                </h3>
-                <p className="mb-4 flex-1 text-sm leading-relaxed text-muted-foreground">
-                  {path.description}
-                </p>
-
-                <div className="mb-4 flex items-center gap-4 text-xs text-muted-foreground">
-                  <span className="flex items-center gap-1">
-                    <BookOpen className="h-3.5 w-3.5" />
-                    {path.module_count} modules
-                  </span>
-                  <span className="flex items-center gap-1">
-                    <Clock className="h-3.5 w-3.5" />
-                    {path.duration}
-                  </span>
+                <h3 className="mb-2 text-[17px] font-semibold text-foreground">{path.title}</h3>
+                <p className="flex-1 text-sm leading-relaxed text-muted-foreground">{path.description}</p>
+                <div className="mt-5 flex items-center gap-1.5 text-sm font-medium text-primary">
+                  Explore <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-1" />
                 </div>
-
-                <button
-                  onClick={() => setExpanded(isExpanded ? null : index)}
-                  className="flex items-center gap-1 text-sm font-medium text-primary transition-colors hover:text-primary/80"
-                  aria-expanded={isExpanded}
-                >
-                  {isExpanded ? "Hide topics" : "View topics"}
-                  <ArrowRight
-                    className={`h-3.5 w-3.5 transition-transform ${isExpanded ? "rotate-90" : ""}`}
-                  />
-                </button>
-
-                <div
-                  className={`grid transition-all duration-300 ease-out ${
-                    isExpanded ? "mt-4 grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0"
-                  }`}
-                >
-                  <div className="overflow-hidden">
-                    <div className="flex flex-wrap gap-2">
-                      {path.topics.map((topic) => (
-                        <Badge
-                          key={topic}
-                          variant="secondary"
-                          className="text-xs font-normal"
-                        >
-                          {topic}
-                        </Badge>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              </article>
-            )
-          })}
-        </StaggerChildren>
+              </Link>
+            </AnimatedItem>
+          ))}
+        </div>
       </div>
     </section>
   )
