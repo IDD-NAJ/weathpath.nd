@@ -126,14 +126,63 @@ function generateFallbackContent(options: ContentGenerationOptions): GeneratedCo
       ]
     },
     story: {
-      title: `Success Story: Achieving Financial Freedom Through ${options.topic}`,
-      content: `Meet Sarah, a 32-year-old professional who transformed her financial life through disciplined ${options.topic}. Like many people, Sarah struggled with managing her finances until she discovered the power of proper ${options.topic} strategies.\n\nThree years ago, Sarah was living paycheck to paycheck, with minimal savings and growing financial stress. "I knew I needed to make a change," she recalls. "Learning about ${options.topic} completely changed my perspective on money management."\n\nThrough consistent effort and education, Sarah implemented a comprehensive ${options.topic} plan. She started by tracking her expenses, creating a realistic budget, and setting clear financial goals. Within six months, she had built an emergency fund and started investing for the future.\n\nToday, Sarah is debt-free and on track to achieve financial independence by age 45. "The key was consistency and education," she explains. "Understanding ${options.topic} gave me the tools to take control of my financial future."`,
-      summary: `How Sarah transformed her financial life through disciplined ${options.topic} and achieved financial freedom.`,
+      title: `From Struggle to Success: How ${options.topic} Changed Everything`,
+      content: `# WHO: Meet Michael Chen
+Michael is a 34-year-old software engineer living in Portland with his wife Jessica and two young children. Before discovering ${options.topic}, he earned a solid six-figure salary but felt completely disconnected from his money and constantly anxious about the future.
+
+# THE BEFORE: A Crisis of Confidence
+Three years ago, Michael was earning $150,000 annually but had less than $10,000 in savings. He was spending every dollar that came in—mortgage, cars, kids' activities, dining out. The wake-up call came when his company announced potential layoffs. "I realized I had zero financial security," Michael recalls. "I could lose my job tomorrow and everything would crumble. That terrified me."
+
+# THE DISCOVERY: A Turning Point
+A colleague mentioned ${options.topic} and recommended starting with just one course. "I was skeptical at first," Michael admits. "I thought, 'I already know about money.' But I was wrong. I didn't know HOW to think about money strategically." He committed to learning the fundamentals and spent the first month simply understanding the core concepts.
+
+# THE JOURNEY: Building Momentum Month by Month
+**Months 1-2: Foundation** - Michael created a detailed budget for the first time in his life. He was shocked to discover he was spending $2,400/month on restaurants and subscriptions he didn't need. He cut this ruthlessly.
+
+**Months 3-4: Emergency Fund** - Using the money from his cuts, Michael built a 6-month emergency fund ($30,000). "This single action reduced my anxiety by 80%," he says. "I finally felt safe."
+
+**Months 5-8: Strategic Implementation** - Michael learned how to implement ${options.topic} principles properly. He reduced expenses further, negotiated his mortgage, and redirected savings into investments.
+
+**Months 9-18: Acceleration** - By month 9, Michael was saving $4,000/month consistently. His investments started compounding. He and Jessica began planning their next moves.
+
+**Months 18-36: Life Change** - After 18 months of disciplined execution, Michael had accumulated $72,000 in investments and paid off $50,000 of his mortgage principal early. His investment portfolio was generating passive income of $300/month.
+
+# CHALLENGES OVERCOME: It Wasn't Perfect
+Michael faced real obstacles:
+- **Family resistance**: Jessica was initially skeptical about the aggressive saving. "Communication was key," Michael says. "I had to show her the plan and the results."
+- **Temptation to spend**: "When I got a promotion, every instinct told me to upgrade our lifestyle. Instead, I increased savings by 40%."
+- **Complexity of investing**: Michael took extra time learning about index funds and diversification. "I attended three webinars before I felt confident pulling the trigger."
+
+# THE RESULTS: Numbers That Matter
+After 36 months of focused ${options.topic} implementation:
+- Emergency fund: $30,000 (6 months expenses)
+- Investment portfolio: $72,000 (growing at 8-10% annually)
+- Mortgage principal paid down: $50,000 extra
+- Monthly passive income: $300-400
+- Career progress: Gained confidence to negotiate 15% raise (now earning $172,500)
+- Financial anxiety: Decreased from 10/10 to 2/10
+
+"More importantly," Michael notes, "we're on track to achieve financial independence by age 50. That's only 16 years away instead of never."
+
+# HARD-WON WISDOM: What Michael Would Tell You
+1. "Start with ONE thing, not everything. I focused on ${options.topic} for the first 6 months before adding other strategies."
+2. "Your financial situation won't change unless your HABITS change. The strategy matters less than the execution."
+3. "Tell someone. Share your goals with your spouse, partner, or close friend. Accountability is everything."
+4. "Celebrate milestones. When I hit $30,000 in investments, I felt genuinely proud. That feeling fueled the next phase."
+5. "This isn't about deprivation. I still enjoy life—I just make intentional choices instead of automatic ones."
+
+# BEYOND THE NUMBERS: What Really Changed
+Michael reflects, "The financial improvement is real and measurable, but the psychological shift is bigger. I went from feeling like a victim of circumstances to feeling like the architect of my own future. I sleep better. I have better conversations with Jessica. I'm more present with my kids because I'm not stressed about money."
+
+His advice to anyone considering this journey: "You're probably further behind than you think, but also closer to success than you realize. It took me 36 months to achieve what seemed impossible 3 years ago. Your journey starts the moment you decide to take control."`,
+      summary: `Michael Chen transformed from paycheck-to-paycheck to financially secure in 3 years using ${options.topic}. He built a $72,000 investment portfolio, eliminated anxiety, and positioned himself for early retirement—all while maintaining his quality of life.`,
       keyPoints: [
-        'Starting point: Living paycheck to paycheck',
-        'The turning point: Discovering proper financial education',
-        'Implementation: Budgeting and goal setting',
-        'Results: Debt-free and on track for early retirement'
+        'Starting point: 6-figure income but zero financial security and constant anxiety',
+        'First breakthrough: Building a 6-month emergency fund reduced anxiety by 80%',
+        'Systematic execution: Implemented ${options.topic} over 36 months with measurable milestones',
+        'Results: $72,000 invested, $50,000 mortgage paid down, $300-400 monthly passive income',
+        'Biggest lesson: Behavior change matters more than strategy—results follow execution',
+        'Timeline perspective: 36 months from crisis to confidence to financial independence planning'
       ]
     },
     learning_path: {
@@ -193,8 +242,17 @@ function buildPrompt(options: ContentGenerationOptions): string {
 
   const typeInstructions = {
     article: `Write an educational article about ${topic}. Include a compelling introduction, 3-4 main sections with clear headings, practical examples, and a conclusion with key takeaways.`,
-    story: `Write an inspirational success story about someone who achieved financial success related to ${topic}. Include challenges faced, solutions implemented, and lessons learned. Make it relatable and motivating.`,
-    learning_path: `Create a structured learning path about ${topic}. Break it down into 5-6 progressive modules, each with clear objectives, key concepts, and practical exercises.`,
+    story: `Write a detailed, inspirational success story about someone who achieved financial success related to ${topic}. Structure it as follows:
+    - WHO: Full character details (profession, age range, background, challenges)
+    - BEFORE: Specific financial situation before (numbers, struggles, mindset)
+    - DISCOVERY: How they discovered ${topic} and what motivated them
+    - JOURNEY: Month-by-month or step-by-step progression with specific milestones
+    - CHALLENGES: Real obstacles faced and how they overcame them
+    - RESULTS: Concrete financial results, income generated, or goals achieved (with numbers)
+    - ADVICE: Specific actionable tips they would give others
+    - IMPACT: How this changed their life beyond finances
+    Make it extremely detailed, specific, relatable, and motivating with real-world scenarios.`,
+    learning_path: `Create a structured learning path about ${topic}. Break it down into 5-6 progressive modules, each with clear objectives, key concepts, practical exercises, and real-world applications.`,
     quiz: `Create a comprehensive quiz about ${topic}. Include 10-15 questions with multiple choice answers, explanations for each answer, and a scoring system.`
   }
 
@@ -354,6 +412,120 @@ export async function improveContent(content: string, focus: string): Promise<st
   } catch (error) {
     console.error('OpenAI API error:', error)
     throw new Error('Failed to improve content')
+  }
+}
+
+export async function generateDetailedStory(options: any): Promise<GeneratedContent> {
+  try {
+    const { topic, difficulty = 'beginner', tone = 'inspirational', audience = 'general', storyFocus = 'transformation', storyIncome = 'moderate', length = 'long' } = options
+    
+    const incomeDetails = {
+      modest: '$500-$2,000/month',
+      moderate: '$2,000-$5,000/month',
+      high: '$5,000-$10,000/month',
+      exceptional: '$10,000+/month'
+    }
+
+    const focusDetails = {
+      transformation: 'complete financial transformation from paycheck-to-paycheck to financial security',
+      career_pivot: 'career change or diversification related to the topic',
+      side_hustle: 'building passive or active income alongside main job',
+      investment: 'investment growth and compounding wealth'
+    }
+
+    const prompt = `
+Create an EXTREMELY DETAILED, HIGHLY SPECIFIC success story about someone who achieved ${focusDetails[storyFocus as keyof typeof focusDetails]} through ${topic}.
+
+CRITICAL REQUIREMENTS:
+1. PERSONA: Create a realistic, detailed character with:
+   - Full name and age
+   - Specific job title and industry
+   - Location/context that feels real
+   - Relatable background challenges
+   - Family situation or personal context
+
+2. THE BEFORE STATE: Show the problem vividly:
+   - Specific numbers: salary, debt, savings, monthly expenses
+   - Emotional state and specific fears
+   - What prompted the change
+   - Concrete examples of financial struggles
+
+3. THE JOURNEY: Month-by-month or quarter-by-quarter progression:
+   - Specific milestones with dates
+   - Exact dollar amounts achieved at each stage
+   - Real obstacles and how they were overcome
+   - Specific decisions and their consequences
+   - Small wins that built momentum
+   - Timeline should span 12-36 months minimum
+
+4. DETAILED IMPLEMENTATION:
+   - Specific strategies used related to ${topic}
+   - Tools, apps, or resources they used
+   - How much time they invested
+   - Key insights or "aha moments"
+   - What surprised them about the process
+
+5. REAL RESULTS: Concrete numbers:
+   - Income generated or saved: approximately ${incomeDetails[storyIncome as keyof typeof incomeDetails]}/month
+   - Assets accumulated (specific amounts)
+   - Debts paid off
+   - Lifestyle improvements
+   - Impact on family/relationships
+
+6. WISDOM SECTION: 5-7 specific actionable tips:
+   - What they would tell beginners
+   - Common mistakes they almost made
+   - Mindset shifts that helped
+   - Specific resources they recommend
+
+7. EMOTIONAL IMPACT: Beyond numbers:
+   - How it changed their confidence
+   - Relationship improvements
+   - Life choices now possible
+   - Why they share their story
+
+TONE: ${tone}, authentic, specific, inspiring but realistic
+AUDIENCE: ${audience}
+LENGTH: ${length} (1500-2500 words minimum for detailed stories)
+
+Format your response exactly as:
+TITLE: [compelling title]
+SUMMARY: [2-3 sentence executive summary]
+KEY_POINTS: [8-10 detailed bullet points]
+TAGS: [7-10 relevant tags]
+CONTENT: [Full detailed story with sections clearly marked with headers and formatting]
+`
+
+    const completion = await getOpenAI().chat.completions.create({
+      model: "gpt-4-turbo",
+      messages: [
+        {
+          role: "system",
+          content: "You are a master storyteller specializing in authentic, detailed, inspirational success stories. Your stories are specific, emotional, and deeply relatable. You include exact numbers, timelines, and personal details that make stories feel real and achievable. You structure stories to show the before, the journey, the obstacles overcome, and the transformation."
+        },
+        {
+          role: "user",
+          content: prompt
+        }
+      ],
+      temperature: 0.8,
+      max_tokens: 4000,
+    })
+
+    const response = completion.choices[0]?.message?.content
+    if (!response) {
+      throw new Error('No story generated')
+    }
+
+    return parseGeneratedContent(response, options)
+  } catch (error: any) {
+    console.error('Story generation error:', error)
+    
+    if (error.message?.includes('quota') || error.code === 'insufficient_quota') {
+      return generateFallbackContent(options)
+    }
+    
+    throw new Error('Failed to generate detailed story')
   }
 }
 

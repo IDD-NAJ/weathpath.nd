@@ -73,6 +73,9 @@ export function AIContentGenerator() {
     includeImage: false,
     promptImageUrl: "",
     promptVideoUrl: "",
+    // Story-specific options
+    storyFocus: "transformation", // transformation, career_pivot, side_hustle, investment
+    storyIncome: "moderate", // modest, moderate, high, exceptional
   })
   const { toast } = useToast()
 
@@ -98,6 +101,11 @@ export function AIContentGenerator() {
           ...formData,
           ...(formData.promptImageUrl && { imageContext: formData.promptImageUrl }),
           ...(formData.promptVideoUrl && { videoContext: formData.promptVideoUrl }),
+          // Include story-specific params for story generation
+          ...(formData.type === "story" && {
+            storyFocus: formData.storyFocus,
+            storyIncome: formData.storyIncome,
+          }),
         }),
       })
 
@@ -298,6 +306,8 @@ export function AIContentGenerator() {
           includeImage: false,
           promptImageUrl: "",
           promptVideoUrl: "",
+          storyFocus: "transformation",
+          storyIncome: "moderate",
         })
       } else {
         console.error('❌ Submit failed:', result.error)
@@ -465,6 +475,42 @@ export function AIContentGenerator() {
                 </SelectContent>
               </Select>
             </div>
+
+            {/* Story-specific options */}
+            {formData.type === "story" && (
+              <>
+                <div className="grid gap-4 md:grid-cols-2 pt-2 border-t border-border">
+                  <div className="space-y-2">
+                    <Label htmlFor="storyFocus">Story Focus</Label>
+                    <Select value={formData.storyFocus} onValueChange={(value: any) => setFormData(prev => ({ ...prev, storyFocus: value }))}>
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="transformation">Complete Transformation</SelectItem>
+                        <SelectItem value="career_pivot">Career Pivot Success</SelectItem>
+                        <SelectItem value="side_hustle">Side Hustle Journey</SelectItem>
+                        <SelectItem value="investment">Investment Growth</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="storyIncome">Success Level</Label>
+                    <Select value={formData.storyIncome} onValueChange={(value: any) => setFormData(prev => ({ ...prev, storyIncome: value }))}>
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="modest">Modest ($500-2k/month)</SelectItem>
+                        <SelectItem value="moderate">Moderate ($2k-5k/month)</SelectItem>
+                        <SelectItem value="high">High ($5k-10k/month)</SelectItem>
+                        <SelectItem value="exceptional">Exceptional (10k+/month)</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+              </>
+            )}
 
             <div className="flex items-center space-x-2">
               <Checkbox 

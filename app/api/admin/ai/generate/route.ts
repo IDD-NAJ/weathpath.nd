@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server"
 import { getCurrentUser } from "@/lib/auth"
-import { generateContent, generateContentIdeas, improveContent, generateQuizQuestions } from "@/lib/openai"
+import { generateContent, generateContentIdeas, improveContent, generateQuizQuestions, generateDetailedStory } from "@/lib/openai"
 export const dynamic = 'force-dynamic'
 
 export async function POST(request: NextRequest) {
@@ -28,7 +28,12 @@ export async function POST(request: NextRequest) {
 
     switch (action) {
       case 'generate':
-        result = await generateContent(params)
+        // Use specialized story generator for stories
+        if (params.type === 'story') {
+          result = await generateDetailedStory(params)
+        } else {
+          result = await generateContent(params)
+        }
         break
       
       case 'ideas':
