@@ -4,7 +4,7 @@ import { useState, useEffect } from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import {
-  Menu, X, TrendingUp, User, LogOut, Shield, LayoutDashboard,
+  Menu, X, User, LogOut, Shield, LayoutDashboard,
   ChevronDown, Plane, Code2, Bitcoin, ShoppingBag, BarChart3, Zap,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
@@ -28,6 +28,7 @@ const topics = [
 ]
 
 const navLinks = [
+  { label: "Courses", href: "/courses" },
   { label: "Articles", href: "/articles" },
   { label: "Stories", href: "/stories" },
 ]
@@ -56,17 +57,15 @@ export function Navigation({ user }: NavigationProps) {
         "sticky top-0 z-50 transition-all duration-300",
         scrolled
           ? "bg-background/95 backdrop-blur-md shadow-sm border-b border-border"
-          : "bg-background/80 backdrop-blur-sm border-b border-transparent"
+          : "bg-background/80 backdrop-blur-sm border-b border-border"
       )}
     >
+      <div className="h-1 w-full bg-primary" aria-hidden="true" />
       <nav className="mx-auto flex max-w-7xl items-center justify-between px-6 py-3" aria-label="Main navigation">
         {/* Logo */}
-        <Link href="/" className="flex items-center gap-2.5 group" aria-label="WealthPath home">
-          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary transition-transform duration-200 group-hover:scale-105">
-            <TrendingUp className="h-5 w-5 text-primary-foreground" />
-          </div>
-          <span className="text-xl font-bold tracking-tight text-foreground">
-            Wealth<span className="text-primary">Path</span>
+        <Link href="/" className="flex items-center gap-2 group" aria-label="WealthPath home">
+          <span className="font-serif text-2xl tracking-tight text-primary">
+            WealthPath
           </span>
         </Link>
 
@@ -90,7 +89,7 @@ export function Navigation({ user }: NavigationProps) {
 
             {topicsOpen && (
               <div
-                className="absolute left-0 top-full mt-1 w-[520px] rounded-2xl border border-border bg-card p-4 shadow-xl shadow-foreground/5 animate-in fade-in slide-in-from-top-2 duration-150"
+                className="absolute left-0 top-full mt-1 w-[520px] rounded-sm border border-border bg-card p-4 shadow-xl shadow-foreground/5 animate-in fade-in slide-in-from-top-2 duration-150"
                 onMouseEnter={() => setTopicsOpen(true)}
               >
                 <p className="mb-3 px-1 text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">Explore Topics</p>
@@ -145,7 +144,7 @@ export function Navigation({ user }: NavigationProps) {
             {user ? (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="outline" size="sm" className="gap-2 rounded-xl">
+                  <Button variant="outline" size="sm" className="gap-2 rounded-sm">
                     <div className="flex h-6 w-6 items-center justify-center rounded-full bg-primary/10">
                       <User className="h-3.5 w-3.5 text-primary" />
                     </div>
@@ -156,7 +155,7 @@ export function Navigation({ user }: NavigationProps) {
                     <ChevronDown className="h-3.5 w-3.5 text-muted-foreground" />
                   </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-48 rounded-xl">
+                <DropdownMenuContent align="end" className="w-48 rounded-sm">
                   <DropdownMenuItem asChild>
                     <Link href="/dashboard" className="cursor-pointer">
                       <LayoutDashboard className="mr-2 h-4 w-4" /> Dashboard
@@ -181,10 +180,10 @@ export function Navigation({ user }: NavigationProps) {
               </DropdownMenu>
             ) : (
               <div className="flex items-center gap-2">
-                <Button variant="ghost" size="sm" asChild className="rounded-xl">
+                <Button variant="ghost" size="sm" asChild className="rounded-sm">
                   <Link href="/login">Sign In</Link>
                 </Button>
-                <Button size="sm" asChild className="rounded-xl">
+                <Button size="sm" asChild className="rounded-sm">
                   <Link href="/signup">Get Started</Link>
                 </Button>
               </div>
