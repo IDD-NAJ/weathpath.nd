@@ -18,6 +18,7 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { LayoutWrapper } from "@/components/layout-wrapper"
 import { getCurrentUser } from "@/lib/auth"
+import { AnimatedSection, AnimatedItem, StaggerChildren } from "@/components/animated-section"
 
 const values = [
   {
@@ -156,22 +157,25 @@ export default async function AboutPage() {
       </section>
 
       {/* Stats bar */}
-      <section className="border-b border-border bg-secondary/50">
-        <div className="mx-auto max-w-6xl px-6 py-10">
-          <div className="grid grid-cols-2 gap-6 sm:grid-cols-4">
-            {stats.map((s) => (
-              <div key={s.label} className="flex flex-col items-center gap-1 text-center">
-                <span className="text-3xl font-bold text-foreground">{s.value}</span>
-                <span className="text-sm text-muted-foreground">{s.label}</span>
-              </div>
-            ))}
+      <AnimatedSection>
+        <section className="border-b border-border bg-secondary/50">
+          <div className="mx-auto max-w-6xl px-6 py-10">
+            <StaggerChildren className="grid grid-cols-2 gap-6 sm:grid-cols-4">
+              {stats.map((s) => (
+                <div key={s.label} className="flex flex-col items-center gap-1 text-center">
+                  <span className="text-3xl font-bold text-foreground">{s.value}</span>
+                  <span className="text-sm text-muted-foreground">{s.label}</span>
+                </div>
+              ))}
+            </StaggerChildren>
           </div>
-        </div>
-      </section>
+        </section>
+      </AnimatedSection>
 
       {/* Mission */}
-      <section className="mx-auto max-w-6xl px-6 py-20">
-        <div className="grid gap-12 md:grid-cols-2 md:items-center">
+      <AnimatedSection>
+        <section className="mx-auto max-w-6xl px-6 py-20">
+          <div className="grid gap-12 md:grid-cols-2 md:items-center">
           <div>
             <Badge variant="secondary" className="mb-4 rounded-full">Our Mission</Badge>
             <h2 className="font-serif text-3xl leading-tight text-foreground md:text-4xl text-balance">
@@ -224,40 +228,44 @@ export default async function AboutPage() {
             </div>
           </div>
         </div>
-      </section>
+        </section>
+      </AnimatedSection>
 
       {/* Values */}
-      <section className="border-t border-border bg-muted/30">
-        <div className="mx-auto max-w-6xl px-6 py-20">
-          <div className="mx-auto max-w-2xl text-center mb-12">
-            <Badge variant="secondary" className="mb-4 rounded-full">Our Values</Badge>
-            <h2 className="font-serif text-3xl text-foreground md:text-4xl text-balance">
-              What makes WealthPath different
-            </h2>
-            <p className="mt-3 text-muted-foreground">
-              These aren&apos;t marketing words. They&apos;re the rules we hold ourselves to in every piece of content we publish.
-            </p>
-          </div>
-          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-            {values.map((v) => (
-              <div
-                key={v.title}
-                className="rounded-2xl border border-border bg-card p-6 transition-shadow hover:shadow-md"
-              >
-                <div className={`mb-4 inline-flex h-11 w-11 items-center justify-center rounded-xl ${v.color}`}>
-                  <v.icon className="h-5 w-5" />
+      <AnimatedSection>
+        <section className="border-t border-border bg-muted/30">
+          <div className="mx-auto max-w-6xl px-6 py-20">
+            <div className="mx-auto max-w-2xl text-center mb-12">
+              <Badge variant="secondary" className="mb-4 rounded-full">Our Values</Badge>
+              <h2 className="font-serif text-3xl text-foreground md:text-4xl text-balance">
+                What makes WealthPath different
+              </h2>
+              <p className="mt-3 text-muted-foreground">
+                These aren&apos;t marketing words. They&apos;re the rules we hold ourselves to in every piece of content we publish.
+              </p>
+            </div>
+            <StaggerChildren className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+              {values.map((v) => (
+                <div
+                  key={v.title}
+                  className="rounded-2xl border border-border bg-card p-6 transition-shadow hover:shadow-md"
+                >
+                  <div className={`mb-4 inline-flex h-11 w-11 items-center justify-center rounded-xl ${v.color}`}>
+                    <v.icon className="h-5 w-5" />
+                  </div>
+                  <h3 className="font-semibold text-foreground mb-2">{v.title}</h3>
+                  <p className="text-sm leading-relaxed text-muted-foreground">{v.description}</p>
                 </div>
-                <h3 className="font-semibold text-foreground mb-2">{v.title}</h3>
-                <p className="text-sm leading-relaxed text-muted-foreground">{v.description}</p>
-              </div>
-            ))}
+              ))}
+            </StaggerChildren>
           </div>
-        </div>
-      </section>
+        </section>
+      </AnimatedSection>
 
       {/* Team */}
-      <section className="mx-auto max-w-6xl px-6 py-20">
-        <div className="mx-auto max-w-2xl text-center mb-12">
+      <AnimatedSection>
+        <section className="mx-auto max-w-6xl px-6 py-20">
+          <div className="mx-auto max-w-2xl text-center mb-12">
           <Badge variant="secondary" className="mb-4 rounded-full">
             <Users className="h-3.5 w-3.5 mr-1" />
             The Team
@@ -325,45 +333,48 @@ export default async function AboutPage() {
             </div>
           </div>
         </div>
-      </section>
+        </section>
+      </AnimatedSection>
 
       {/* Testimonials */}
-      <section className="border-t border-border bg-muted/30">
-        <div className="mx-auto max-w-6xl px-6 py-20">
-          <div className="mx-auto max-w-2xl text-center mb-12">
-            <Badge variant="secondary" className="mb-4 rounded-full">
-              <Star className="h-3.5 w-3.5 mr-1 text-topic-bitcoin" />
-              Reader Stories
-            </Badge>
-            <h2 className="font-serif text-3xl text-foreground md:text-4xl text-balance">
-              What our readers say
-            </h2>
-          </div>
-          <div className="grid gap-6 sm:grid-cols-3">
-            {testimonials.map((t) => (
-              <div
-                key={t.name}
-                className="rounded-2xl border border-border bg-card p-6 flex flex-col gap-4"
-              >
-                <Quote className="h-5 w-5 text-primary/40" />
-                <p className="text-sm leading-relaxed text-foreground flex-1">&ldquo;{t.quote}&rdquo;</p>
+      <AnimatedSection>
+        <section className="border-t border-border bg-muted/30">
+          <div className="mx-auto max-w-6xl px-6 py-20">
+            <div className="mx-auto max-w-2xl text-center mb-12">
+              <Badge variant="secondary" className="mb-4 rounded-full">
+                <Star className="h-3.5 w-3.5 mr-1 text-topic-bitcoin" />
+                Reader Stories
+              </Badge>
+              <h2 className="font-serif text-3xl text-foreground md:text-4xl text-balance">
+                What our readers say
+              </h2>
+            </div>
+            <StaggerChildren className="grid gap-6 sm:grid-cols-3">
+              {testimonials.map((t) => (
+                <div
+                  key={t.name}
+                  className="rounded-2xl border border-border bg-card p-6 flex flex-col gap-4"
+                >
+                  <Quote className="h-5 w-5 text-primary/40" />
+                  <p className="text-sm leading-relaxed text-foreground flex-1">&ldquo;{t.quote}&rdquo;</p>
                 <div className="flex items-center justify-between">
                   <span className="text-sm font-medium text-foreground">{t.name}</span>
                   <Badge variant="secondary" className="text-[11px] rounded-full">{t.tag}</Badge>
                 </div>
-              </div>
-            ))}
+                </div>
+              ))}
+            </StaggerChildren>
           </div>
-        </div>
-      </section>
+        </section>
+      </AnimatedSection>
 
       {/* CTA */}
-      <section className="border-t border-border bg-primary">
-        <div className="mx-auto max-w-6xl px-6 py-20 text-center">
-          <Zap className="mx-auto mb-5 h-10 w-10 text-primary-foreground/60" />
-          <h2 className="font-serif text-3xl text-primary-foreground md:text-4xl text-balance">
-            Ready to start your own path?
-          </h2>
+      <AnimatedSection>
+        <section className="bg-gradient-to-br from-primary to-primary-dark py-20">
+          <div className="mx-auto max-w-2xl px-6 text-center">
+            <h2 className="font-serif text-3xl leading-tight text-primary-foreground md:text-4xl text-balance">
+              Ready to start your own path?
+            </h2>
           <p className="mx-auto mt-4 max-w-md text-primary-foreground/70">
             Join over 15,000 members getting honest weekly insights on building passive income — completely free.
           </p>
@@ -388,7 +399,8 @@ export default async function AboutPage() {
             </Button>
           </div>
         </div>
-      </section>
+        </section>
+      </AnimatedSection>
     </LayoutWrapper>
   )
 }
