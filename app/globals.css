@@ -168,6 +168,9 @@
   }
   html {
     scroll-behavior: smooth;
+    transform: scale(0.9);
+    transform-origin: top center;
+    width: 100%;
   }
   body {
     @apply bg-background text-foreground;
