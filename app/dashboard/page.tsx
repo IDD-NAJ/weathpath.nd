@@ -231,20 +231,21 @@ export default function DashboardPage() {
   return (
     <div className="flex flex-col gap-8">
       {/* Welcome header */}
-      <div className="flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
-        <div>
-          <p className="text-sm text-muted-foreground">{greeting}</p>
-          <h1 className="text-2xl font-bold text-foreground md:text-3xl">
+      <div className="flex flex-col gap-3 sm:gap-4 sm:flex-row sm:items-end sm:justify-between">
+        <div className="min-w-0">
+          <p className="text-xs sm:text-sm text-muted-foreground">{greeting}</p>
+          <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-foreground truncate">
             {firstName}&apos;s Dashboard
           </h1>
-          <p className="text-sm text-muted-foreground mt-1">
+          <p className="text-xs sm:text-sm text-muted-foreground mt-1">
             Continue your wealth-building journey
           </p>
         </div>
-        <Button asChild className="hidden sm:flex rounded-xl gap-2 self-end" size="sm">
+        <Button asChild className="w-full sm:w-auto sm:self-end rounded-xl gap-2" size="sm">
           <Link href="/#learn">
             <BookOpen className="h-3.5 w-3.5" />
-            Explore Learning Paths
+            <span className="hidden sm:inline">Explore Learning Paths</span>
+            <span className="sm:hidden">Learn More</span>
           </Link>
         </Button>
       </div>
@@ -308,11 +309,11 @@ export default function DashboardPage() {
               <div className="flex flex-col gap-4">
                 {userData.progress.map((path: any) => (
                   <div key={path.id} className="flex flex-col gap-1.5">
-                    <div className="flex items-center justify-between">
-                      <span className="text-xs font-medium text-foreground truncate max-w-[160px]">
+                    <div className="flex items-center justify-between gap-2 min-w-0">
+                      <span className="text-xs font-medium text-foreground truncate">
                         {path.title}
                       </span>
-                      <span className="text-xs text-muted-foreground ml-2 shrink-0">
+                      <span className="text-xs text-muted-foreground shrink-0">
                         {path.progress_percentage}%
                       </span>
                     </div>
@@ -431,34 +432,34 @@ export default function DashboardPage() {
           </div>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+          <div className="grid grid-cols-2 gap-2 sm:gap-3 sm:grid-cols-3 lg:grid-cols-4">
             {achievements.map((a) => {
               const unlocked = a.check(userData)
               const prog = a.progress ? a.progress(userData) : undefined
               return (
                 <div
                   key={a.id}
-                  className={`relative rounded-xl border p-4 flex flex-col items-center gap-2 text-center transition-all ${
+                  className={`relative rounded-xl border p-3 sm:p-4 flex flex-col items-center gap-1.5 sm:gap-2 text-center transition-all ${
                     unlocked
                       ? a.color
                       : "border-border bg-muted/30 opacity-60"
                   }`}
                 >
                   {!unlocked && (
-                    <Lock className="absolute top-2 right-2 h-3 w-3 text-muted-foreground" />
+                    <Lock className="absolute top-1.5 right-1.5 h-2.5 w-2.5 sm:h-3 sm:w-3 text-muted-foreground" />
                   )}
-                  <span className="text-2xl">{a.icon}</span>
-                  <div>
-                    <p className="text-xs font-semibold text-foreground">{a.title}</p>
-                    <p className="text-[11px] text-muted-foreground mt-0.5 leading-relaxed">
+                  <span className="text-xl sm:text-2xl">{a.icon}</span>
+                  <div className="min-w-0">
+                    <p className="text-xs font-semibold text-foreground truncate">{a.title}</p>
+                    <p className="text-[10px] sm:text-[11px] text-muted-foreground mt-0.5 leading-tight">
                       {a.description}
                     </p>
                   </div>
                   {!unlocked && prog !== undefined && (
-                    <Progress value={prog} className="h-1 w-full" />
+                    <Progress value={prog} className="h-0.5 w-full mt-0.5" />
                   )}
                   {unlocked && (
-                    <Badge className="text-[10px] rounded-full px-2 py-0 h-auto capitalize">
+                    <Badge className="text-[9px] sm:text-[10px] rounded-full px-1.5 py-0 h-auto capitalize mt-0.5">
                       Unlocked
                     </Badge>
                   )}
@@ -480,20 +481,20 @@ export default function DashboardPage() {
             All articles <ChevronRight className="h-3 w-3" />
           </Link>
         </div>
-        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-3 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
           {quickLinks.map((link) => (
             <Link key={link.title} href={link.href}>
-              <div className="group flex items-center gap-3 rounded-xl border border-border p-4 transition-all hover:border-primary/30 hover:bg-muted/40 hover:shadow-sm">
-                <div className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-xl ${link.color}`}>
+              <div className="group flex items-center gap-3 rounded-xl border border-border p-3 sm:p-4 transition-all hover:border-primary/30 hover:bg-muted/40 hover:shadow-sm">
+                <div className={`flex h-8 w-8 sm:h-9 sm:w-9 shrink-0 items-center justify-center rounded-xl ${link.color}`}>
                   <link.icon className="h-4 w-4" />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-foreground group-hover:text-primary transition-colors">
+                  <p className="text-sm font-medium text-foreground group-hover:text-primary transition-colors truncate">
                     {link.title}
                   </p>
                   <p className="text-xs text-muted-foreground truncate">{link.description}</p>
                 </div>
-                <ArrowRight className="h-4 w-4 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity shrink-0" />
+                <ArrowRight className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity shrink-0" />
               </div>
             </Link>
           ))}
@@ -507,12 +508,12 @@ export default function DashboardPage() {
           <CardDescription className="text-xs">Dive into a wealth-building category</CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-6">
+          <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6">
             {topicLinks.map((t) => (
               <Link key={t.href} href={t.href}>
-                <div className="flex flex-col items-center gap-2 rounded-xl border border-border p-3.5 text-center hover:border-primary/30 hover:bg-muted/40 transition-all group">
-                  <t.icon className={`h-5 w-5 ${t.color}`} />
-                  <span className="text-[11px] font-medium text-foreground group-hover:text-primary transition-colors leading-tight">
+                <div className="flex flex-col items-center gap-1.5 sm:gap-2 rounded-xl border border-border p-2.5 sm:p-3.5 text-center hover:border-primary/30 hover:bg-muted/40 transition-all group">
+                  <t.icon className={`h-4 w-4 sm:h-5 sm:w-5 ${t.color}`} />
+                  <span className="text-[10px] sm:text-[11px] font-medium text-foreground group-hover:text-primary transition-colors leading-tight truncate px-0.5">
                     {t.label}
                   </span>
                 </div>
