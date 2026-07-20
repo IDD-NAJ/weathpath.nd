@@ -33,6 +33,7 @@ import { Checkbox } from "@/components/ui/checkbox"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { AnimatedCard } from "@/components/ui/animated-card"
 import { useToast } from "@/hooks/use-toast"
+import { MediaUploadField } from "@/components/admin/media-upload-field"
 
 interface GeneratedContent {
   title: string
@@ -69,7 +70,9 @@ export function AIContentGenerator() {
     tone: "educational",
     length: "medium",
     audience: "general",
-    includeImage: false
+    includeImage: false,
+    promptImageUrl: "",
+    promptVideoUrl: "",
   })
   const { toast } = useToast()
 
@@ -92,7 +95,9 @@ export function AIContentGenerator() {
         },
         body: JSON.stringify({
           action: "generate",
-          ...formData
+          ...formData,
+          ...(formData.promptImageUrl && { imageContext: formData.promptImageUrl }),
+          ...(formData.promptVideoUrl && { videoContext: formData.promptVideoUrl }),
         }),
       })
 
@@ -290,7 +295,9 @@ export function AIContentGenerator() {
           tone: "educational",
           length: "medium",
           audience: "general",
-          includeImage: false
+          includeImage: false,
+          promptImageUrl: "",
+          promptVideoUrl: "",
         })
       } else {
         console.error('❌ Submit failed:', result.error)
@@ -468,6 +475,30 @@ export function AIContentGenerator() {
               <Label htmlFor="includeImage" className="text-sm">
                 Include relevant image (Pixabay)
               </Label>
+            </div>
+
+            {/* Prompt Media — image or video to attach as AI context */}
+            <div className="rounded-lg border border-border p-4 flex flex-col gap-4 bg-muted/30">
+              <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                Prompt Media Context (optional)
+              </p>
+              <p className="text-xs text-muted-foreground -mt-2">
+                Attach an image or video to give the AI visual context when generating content.
+              </p>
+              <MediaUploadField
+                label="Reference Image"
+                type="image"
+                urlFieldName="_promptImageUrl"
+                defaultUrl={formData.promptImageUrl}
+                onUrlChange={(url) => setFormData(prev => ({ ...prev, promptImageUrl: url }))}
+              />
+              <MediaUploadField
+                label="Reference Video"
+                type="video"
+                urlFieldName="_promptVideoUrl"
+                defaultUrl={formData.promptVideoUrl}
+                onUrlChange={(url) => setFormData(prev => ({ ...prev, promptVideoUrl: url }))}
+              />
             </div>
 
             <div className="flex gap-2">

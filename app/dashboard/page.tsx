@@ -1,19 +1,19 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState } from "react"
 import useSWR from "swr"
-import { BookOpen, Calculator, HelpCircle, ArrowRight, Star, FileText, Award, Clock, Target, Bell, Bookmark, TrendingUp, Trophy, Zap } from "lucide-react"
+import {
+  BookOpen, Calculator, HelpCircle, ArrowRight, Star, FileText,
+  Award, Target, Bell, Bookmark, TrendingUp, Trophy, Zap, Lock,
+  Plane, Code2, Bitcoin, ShoppingBag, BarChart3, ChevronRight,
+  Sparkles, Circle,
+} from "lucide-react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
+import { Skeleton } from "@/components/ui/skeleton"
+import { Progress } from "@/components/ui/progress"
 import Link from "next/link"
-import { motion } from "framer-motion"
-import { AnimatedStatCard, AnimatedCard } from "@/components/ui/animated-card"
-import { AnimatedProgress, CircularProgress } from "@/components/ui/animated-progress"
-import { AchievementBadge } from "@/components/ui/achievement-badge"
-import { ProgressDonut } from "@/components/charts/progress-donut"
-import { LayoutWrapper } from "@/components/layout-wrapper"
-import { getCurrentUser } from "@/lib/auth"
 
 interface UserData {
   progress: Array<any>
@@ -23,429 +23,544 @@ interface UserData {
   notifications: Array<any>
 }
 
-interface DashboardStats {
-  totalUsers: number
-  completedPaths: number
-  bookmarks: number
-  quizScore: string | number
-}
-
 const fetcher = async (url: string) => {
   const response = await fetch(url)
-  if (!response.ok) {
-    throw new Error('Failed to fetch data')
-  }
+  if (!response.ok) throw new Error("Failed to fetch")
   return response.json()
 }
 
-export default function DashboardPage() {
-  const { data: userData, error, isLoading } = useSWR<UserData>('/api/user/progress', fetcher)
-  const [user, setUser] = useState<any>(null)
+const profileFetcher = async (url: string) => {
+  const response = await fetch(url)
+  if (!response.ok) throw new Error("Failed to fetch")
+  return response.json()
+}
 
-  useEffect(() => {
-    // Fetch current user data
-    const fetchUser = async () => {
-      try {
-        const response = await fetch('/api/user/profile')
-        if (response.ok) {
-          const data = await response.json()
-          setUser(data.user)
-        }
-      } catch (error) {
-        console.error('Failed to fetch user:', error)
-      }
-    }
-    fetchUser()
-  }, [])
+const quickLinks = [
+  {
+    title: "Learning Paths",
+    description: "Structured courses on passive income",
+    icon: BookOpen,
+    href: "/#learn",
+    color: "text-topic-invest bg-topic-invest/10",
+  },
+  {
+    title: "Income Quiz",
+    description: "Find your best income strategy",
+    icon: HelpCircle,
+    href: "/#quiz",
+    color: "text-topic-hustle bg-topic-hustle/10",
+  },
+  {
+    title: "Compound Calculator",
+    description: "Project your wealth growth",
+    icon: Calculator,
+    href: "/#calculator",
+    color: "text-topic-bitcoin bg-topic-bitcoin/10",
+  },
+  {
+    title: "Success Stories",
+    description: "Real passive income journeys",
+    icon: Star,
+    href: "/#stories",
+    color: "text-topic-travel bg-topic-travel/10",
+  },
+  {
+    title: "Resources",
+    description: "Books, podcasts, and tools",
+    icon: FileText,
+    href: "/#resources",
+    color: "text-topic-coding bg-topic-coding/10",
+  },
+  {
+    title: "Articles",
+    description: "Deep dives across all topics",
+    icon: Sparkles,
+    href: "/articles",
+    color: "text-topic-dropship bg-topic-dropship/10",
+  },
+]
 
-  if (isLoading || !user) {
-    return (
-      <LayoutWrapper showNavigation={false}>
-        <div className="flex min-h-screen items-center justify-center">
-          <motion.div
-            animate={{ rotate: 360 }}
-            transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-          >
-            <Target className="h-8 w-8 text-primary" />
-          </motion.div>
-        </div>
-      </LayoutWrapper>
-    )
-  }
+const topicLinks = [
+  { label: "Travel Content", href: "/topics/travel", icon: Plane, color: "text-topic-travel" },
+  { label: "Coding & Tech", href: "/topics/coding", icon: Code2, color: "text-topic-coding" },
+  { label: "Bitcoin & Crypto", href: "/topics/bitcoin", icon: Bitcoin, color: "text-topic-bitcoin" },
+  { label: "Dropshipping", href: "/topics/dropshipping", icon: ShoppingBag, color: "text-topic-dropship" },
+  { label: "Investing", href: "/topics/investing", icon: BarChart3, color: "text-topic-invest" },
+  { label: "Side Hustles", href: "/topics/side-hustles", icon: Zap, color: "text-topic-hustle" },
+]
 
-  if (error || !userData) {
-    return (
-      <LayoutWrapper showNavigation={false}>
-        <div className="flex min-h-screen items-center justify-center">
-          <div className="text-center">
-            <Target className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-            <h2 className="text-lg font-medium">Error loading dashboard</h2>
-            <p className="text-muted-foreground mb-4">Unable to load your dashboard data.</p>
-            <Button onClick={() => window.location.reload()}>Try Again</Button>
+const achievements = [
+  {
+    id: "first-steps",
+    icon: "🌱",
+    title: "First Steps",
+    description: "Complete your first learning path",
+    type: "bronze",
+    color: "border-amber-300 bg-amber-50 dark:bg-amber-950/20",
+    iconColor: "text-amber-600",
+    check: (d: UserData) => d.progress.some((p: any) => p.progress_percentage === 100),
+  },
+  {
+    id: "knowledge-seeker",
+    icon: "📚",
+    title: "Knowledge Seeker",
+    description: "Complete 3 learning paths",
+    type: "silver",
+    color: "border-slate-300 bg-slate-50 dark:bg-slate-900/20",
+    iconColor: "text-slate-500",
+    check: (d: UserData) => d.progress.filter((p: any) => p.progress_percentage === 100).length >= 3,
+    progress: (d: UserData) =>
+      Math.min((d.progress.filter((p: any) => p.progress_percentage === 100).length / 3) * 100, 100),
+  },
+  {
+    id: "quiz-master",
+    icon: "🏆",
+    title: "Quiz Master",
+    description: "Score 90%+ on any quiz",
+    type: "gold",
+    color: "border-yellow-300 bg-yellow-50 dark:bg-yellow-950/20",
+    iconColor: "text-yellow-600",
+    check: (d: UserData) => d.quizResults.some((q: any) => q.score >= 90),
+  },
+  {
+    id: "dedicated",
+    icon: "🔥",
+    title: "Dedicated Learner",
+    description: "Active for 30 days",
+    type: "platinum",
+    color: "border-primary/30 bg-primary/5",
+    iconColor: "text-primary",
+    check: () => false,
+    progress: () => 65,
+  },
+]
+
+function StatCard({
+  title,
+  value,
+  description,
+  icon: Icon,
+  trend,
+}: {
+  title: string
+  value: string | number
+  description: string
+  icon: React.ElementType
+  trend?: string
+}) {
+  return (
+    <Card className="relative overflow-hidden">
+      <CardContent className="p-5">
+        <div className="flex items-start justify-between mb-3">
+          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary/10">
+            <Icon className="h-4.5 w-4.5 text-primary" />
           </div>
+          {trend && (
+            <Badge variant="secondary" className="text-[11px] rounded-full">{trend}</Badge>
+          )}
         </div>
-      </LayoutWrapper>
+        <p className="text-2xl font-bold text-foreground">{value}</p>
+        <p className="text-xs text-muted-foreground mt-0.5">{title}</p>
+        <p className="text-[11px] text-muted-foreground/70 mt-1">{description}</p>
+      </CardContent>
+    </Card>
+  )
+}
+
+function LoadingSkeleton() {
+  return (
+    <div className="flex flex-col gap-8">
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        {[...Array(4)].map((_, i) => (
+          <Card key={i}><CardContent className="p-5"><Skeleton className="h-24 w-full" /></CardContent></Card>
+        ))}
+      </div>
+      <div className="grid gap-6 lg:grid-cols-3">
+        {[...Array(3)].map((_, i) => (
+          <Card key={i}><CardContent className="p-5"><Skeleton className="h-48 w-full" /></CardContent></Card>
+        ))}
+      </div>
+    </div>
+  )
+}
+
+export default function DashboardPage() {
+  const { data: userData, error, isLoading } = useSWR<UserData>("/api/user/progress", fetcher)
+  const { data: profileData } = useSWR<{ user: any }>("/api/user/profile", profileFetcher)
+
+  const user = profileData?.user
+
+  if (isLoading) {
+    return (
+      <div className="flex flex-col gap-6">
+        <div>
+          <Skeleton className="h-8 w-48 mb-2" />
+          <Skeleton className="h-4 w-72" />
+        </div>
+        <LoadingSkeleton />
+      </div>
     )
   }
 
-  const stats: DashboardStats = {
-    totalUsers: userData.progress.length,
-    completedPaths: userData.progress.filter(p => p.progress_percentage === 100).length,
-    bookmarks: userData.bookmarks.length,
-    quizScore: userData.quizResults.length > 0 ? `${userData.quizResults[0].score}%` : "N/A"
+  if (error || !userData || !user) {
+    return (
+      <div className="flex min-h-[50vh] flex-col items-center justify-center gap-4 text-center">
+        <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-muted">
+          <Target className="h-8 w-8 text-muted-foreground" />
+        </div>
+        <div>
+          <h2 className="text-lg font-semibold text-foreground">Unable to load dashboard</h2>
+          <p className="text-sm text-muted-foreground mt-1">Something went wrong fetching your data.</p>
+        </div>
+        <Button onClick={() => window.location.reload()} variant="outline">Reload</Button>
+      </div>
+    )
   }
 
-  const quickLinks = [
-    {
-      title: "Learning Paths",
-      description: "Browse structured courses on building passive income",
-      icon: BookOpen,
-      href: "/#learn",
-    },
-    {
-      title: "Income Quiz",
-      description: "Discover which passive income strategies suit you best",
-      icon: HelpCircle,
-      href: "/#quiz",
-    },
-    {
-      title: "Compound Calculator",
-      description: "See how your money can grow over time",
-      icon: Calculator,
-      href: "/#calculator",
-    },
-    {
-      title: "Success Stories",
-      description: "Read how others built their passive income streams",
-      icon: Star,
-      href: "/#stories",
-    },
-    {
-      title: "Resources",
-      description: "Curated books, podcasts, and articles on wealth building",
-      icon: FileText,
-      href: "/#resources",
-    },
-  ]
+  const completedPaths = userData.progress.filter((p: any) => p.progress_percentage === 100).length
+  const latestScore = userData.quizResults.length > 0 ? `${userData.quizResults[0].score}%` : "N/A"
+  const firstName = user.name?.split(" ")[0] ?? "there"
+
+  const greeting = (() => {
+    const h = new Date().getHours()
+    if (h < 12) return "Good morning"
+    if (h < 17) return "Good afternoon"
+    return "Good evening"
+  })()
 
   return (
-    <LayoutWrapper showNavigation={false}>
-      <div className="px-6 pt-8 pb-20">
-        <div className="mx-auto max-w-6xl">
-          <div className="flex flex-col gap-8">
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5 }}
-            >
-              <h1 className="text-3xl font-bold tracking-tight text-foreground">
-                Welcome back, {user.name.split(" ")[0]}
-              </h1>
-              <p className="mt-1 text-muted-foreground">
-                Continue your journey toward building lasting passive wealth
-              </p>
-            </motion.div>
+    <div className="flex flex-col gap-8">
+      {/* Welcome header */}
+      <div className="flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
+        <div>
+          <p className="text-sm text-muted-foreground">{greeting}</p>
+          <h1 className="text-2xl font-bold text-foreground md:text-3xl">
+            {firstName}&apos;s Dashboard
+          </h1>
+          <p className="text-sm text-muted-foreground mt-1">
+            Continue your wealth-building journey
+          </p>
+        </div>
+        <Button asChild className="hidden sm:flex rounded-xl gap-2 self-end" size="sm">
+          <Link href="/#learn">
+            <BookOpen className="h-3.5 w-3.5" />
+            Explore Learning Paths
+          </Link>
+        </Button>
+      </div>
 
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-              <AnimatedStatCard
-                title="Learning Progress"
-                value={`${userData.progress.length} paths`}
-                description="Active learning paths"
-                icon={<Target className="h-4 w-4" />}
-                delay={0.1}
-              />
-              <AnimatedStatCard
-                title="Completed"
-                value={userData.progress.filter(p => p.progress_percentage === 100).length}
-                description="Finished paths"
-                icon={<Award className="h-4 w-4" />}
-                delay={0.2}
-              />
-              <AnimatedStatCard
-                title="Bookmarks"
-                value={userData.bookmarks.length}
-                description="Saved content"
-                icon={<Bookmark className="h-4 w-4" />}
-                delay={0.3}
-              />
-              <AnimatedStatCard
-                title="Quiz Score"
-                value={userData.quizResults.length > 0 ? `${userData.quizResults[0].score}%` : "N/A"}
-                description="Latest quiz result"
-                icon={<TrendingUp className="h-4 w-4" />}
-                delay={0.4}
-              />
-            </div>
+      {/* Stats grid */}
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <StatCard
+          title="Active Paths"
+          value={userData.progress.length}
+          description="Learning paths started"
+          icon={Target}
+        />
+        <StatCard
+          title="Completed"
+          value={completedPaths}
+          description={completedPaths === 1 ? "Path finished" : "Paths finished"}
+          icon={Award}
+          trend={completedPaths > 0 ? "Done" : undefined}
+        />
+        <StatCard
+          title="Bookmarks"
+          value={userData.bookmarks.length}
+          description="Saved articles & stories"
+          icon={Bookmark}
+        />
+        <StatCard
+          title="Quiz Score"
+          value={latestScore}
+          description="Latest result"
+          icon={TrendingUp}
+          trend={latestScore !== "N/A" ? "Latest" : undefined}
+        />
+      </div>
 
-            {/* Progress Overview Section */}
-            <div className="grid gap-6 lg:grid-cols-3">
-              <AnimatedCard delay={0.5}>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2 text-base">
-                    <Target className="h-4 w-4" />
-                    Your Progress
-                  </CardTitle>
-                  <CardDescription>Learning paths you're working on</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  {userData.progress.length === 0 ? (
-                    <div className="text-center py-8">
-                      <div className="mx-auto w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center mb-4">
-                        <Target className="h-6 w-6 text-primary" />
-                      </div>
-                      <p className="text-sm text-muted-foreground mb-4">No learning paths started yet</p>
-                      <Link
-                        href="/#learn"
-                        className="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
-                      >
-                        Start Learning
-                        <ArrowRight className="ml-2 h-4 w-4" />
-                      </Link>
-                    </div>
-                  ) : (
-                    <div className="space-y-4">
-                      {userData.progress.map((path: any, index: number) => (
-                        <motion.div
-                          key={path.id}
-                          initial={{ opacity: 0, x: -20 }}
-                          animate={{ opacity: 1, x: 0 }}
-                          transition={{ duration: 0.3, delay: 0.6 + index * 0.1 }}
-                          className="space-y-2"
-                        >
-                          <div className="flex items-center justify-between">
-                            <span className="text-sm font-medium">{path.title}</span>
-                            <Badge variant="outline">{path.progress_percentage}%</Badge>
-                          </div>
-                          <AnimatedProgress 
-                            value={path.progress_percentage} 
-                            size="sm"
-                            color={path.progress_percentage === 100 ? "success" : "primary"}
-                          />
-                        </motion.div>
-                      ))}
-                    </div>
-                  )}
-                </CardContent>
-              </AnimatedCard>
-
-              <AnimatedCard delay={0.6}>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2 text-base">
-                    <Bookmark className="h-4 w-4" />
-                    Recent Bookmarks
-                  </CardTitle>
-                  <CardDescription>Content you've saved</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  {userData.bookmarks.length === 0 ? (
-                    <div className="text-center py-8">
-                      <div className="mx-auto w-12 h-12 rounded-lg bg-secondary flex items-center justify-center mb-4">
-                        <Bookmark className="h-6 w-6 text-muted-foreground" />
-                      </div>
-                      <p className="text-sm text-muted-foreground">No bookmarks yet</p>
-                    </div>
-                  ) : (
-                    <div className="space-y-3">
-                      {userData.bookmarks.map((bookmark: any, index: number) => (
-                        <motion.div
-                          key={index}
-                          initial={{ opacity: 0, y: 10 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          transition={{ duration: 0.3, delay: 0.7 + index * 0.1 }}
-                          className="flex items-center justify-between p-2 rounded-lg border border-border hover:bg-secondary/50 transition-colors"
-                        >
-                          <div className="flex-1 min-w-0">
-                            <span className="text-sm font-medium truncate">{bookmark.title}</span>
-                          </div>
-                          <Badge variant="secondary" className="text-xs ml-2">
-                            {bookmark.item_type}
-                          </Badge>
-                        </motion.div>
-                      ))}
-                    </div>
-                  )}
-                </CardContent>
-              </AnimatedCard>
-
-              <AnimatedCard delay={0.7}>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2 text-base">
-                    <Bell className="h-4 w-4" />
-                    Notifications
-                  </CardTitle>
-                  <CardDescription>Updates and alerts</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  {userData.notifications.length === 0 ? (
-                    <div className="text-center py-8">
-                      <div className="mx-auto w-12 h-12 rounded-lg bg-green-100 flex items-center justify-center mb-4">
-                        <Bell className="h-6 w-6 text-green-600" />
-                      </div>
-                      <p className="text-sm text-muted-foreground">No new notifications</p>
-                    </div>
-                  ) : (
-                    <div className="space-y-3">
-                      {userData.notifications.map((notif: any, index: number) => (
-                        <motion.div
-                          key={notif.id}
-                          initial={{ opacity: 0, scale: 0.9 }}
-                          animate={{ opacity: 1, scale: 1 }}
-                          transition={{ duration: 0.3, delay: 0.8 + index * 0.1 }}
-                          className="p-3 rounded-lg border border-border bg-card/50"
-                        >
-                          <div className="flex items-start gap-2">
-                            <div className="w-2 h-2 rounded-full bg-blue-500 mt-1.5" />
-                            <div className="flex-1">
-                              <p className="text-sm font-medium">{notif.title}</p>
-                              <p className="text-xs text-muted-foreground mt-1">{notif.message}</p>
-                            </div>
-                          </div>
-                        </motion.div>
-                      ))}
-                    </div>
-                  )}
-                </CardContent>
-              </AnimatedCard>
-            </div>
-
-            {/* Achievements Section */}
-            <AnimatedCard delay={0.8}>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-base">
-                  <Trophy className="h-4 w-4" />
-                  Your Achievements
-                </CardTitle>
-                <CardDescription>Milestones and accomplishments</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-                  <AchievementBadge
-                    type="bronze"
-                    title="First Steps"
-                    description="Complete your first learning path"
-                    unlocked={userData.progress.some(p => p.progress_percentage === 100)}
-                    delay={0.9}
-                  />
-                  <AchievementBadge
-                    type="silver"
-                    title="Knowledge Seeker"
-                    description="Complete 3 learning paths"
-                    unlocked={userData.progress.filter(p => p.progress_percentage === 100).length >= 3}
-                    progress={Math.min((userData.progress.filter(p => p.progress_percentage === 100).length / 3) * 100, 100)}
-                    delay={1.0}
-                  />
-                  <AchievementBadge
-                    type="gold"
-                    title="Quiz Master"
-                    description="Score 90% or higher on any quiz"
-                    unlocked={userData.quizResults.some(q => q.score >= 90)}
-                    delay={1.1}
-                  />
-                  <AchievementBadge
-                    type="platinum"
-                    title="Dedicated Learner"
-                    description="Active for 30 days"
-                    unlocked={false}
-                    progress={65}
-                    delay={1.2}
-                  />
+      {/* Main content grid */}
+      <div className="grid gap-6 lg:grid-cols-3">
+        {/* Progress */}
+        <Card id="progress">
+          <CardHeader className="pb-3">
+            <CardTitle className="flex items-center gap-2 text-sm font-semibold">
+              <Target className="h-4 w-4 text-primary" />
+              Learning Progress
+            </CardTitle>
+            <CardDescription className="text-xs">Your active learning paths</CardDescription>
+          </CardHeader>
+          <CardContent>
+            {userData.progress.length === 0 ? (
+              <div className="flex flex-col items-center gap-3 py-8 text-center">
+                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-muted">
+                  <BookOpen className="h-6 w-6 text-muted-foreground" />
                 </div>
-              </CardContent>
-            </AnimatedCard>
-
-            {/* Quick Links Section */}
-            <AnimatedCard delay={0.9}>
-              <CardHeader>
-                <CardTitle className="text-base">Quick Links</CardTitle>
-                <CardDescription>Explore WealthPath features</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-                  {quickLinks.map((link, index) => (
-                    <motion.div
-                      key={link.title}
-                      initial={{ opacity: 0, scale: 0.9 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      transition={{ duration: 0.3, delay: 1.0 + index * 0.05 }}
-                    >
-                      <Link href={link.href}>
-                        <div className="group flex items-center gap-3 rounded-lg border border-border p-3 transition-all duration-200 hover:border-primary/30 hover:bg-secondary/50 hover:shadow-md">
-                          <motion.div 
-                            className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10"
-                            whileHover={{ scale: 1.1, rotate: 5 }}
-                            transition={{ duration: 0.2 }}
-                          >
-                            <link.icon className="h-4 w-4 text-primary" />
-                          </motion.div>
-                          <div className="flex-1 min-w-0">
-                            <p className="text-sm font-medium text-foreground group-hover:text-primary transition-colors">{link.title}</p>
-                            <p className="text-xs text-muted-foreground truncate">{link.description}</p>
-                          </div>
-                          <ArrowRight className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors opacity-0 group-hover:opacity-100" />
-                        </div>
-                      </Link>
-                    </motion.div>
-                  ))}
+                <div>
+                  <p className="text-sm font-medium text-foreground">No paths started yet</p>
+                  <p className="text-xs text-muted-foreground mt-1">Pick a topic and begin learning</p>
                 </div>
-              </CardContent>
-            </AnimatedCard>
+                <Button asChild size="sm" className="rounded-xl">
+                  <Link href="/#learn">Browse Paths <ArrowRight className="ml-1.5 h-3.5 w-3.5" /></Link>
+                </Button>
+              </div>
+            ) : (
+              <div className="flex flex-col gap-4">
+                {userData.progress.map((path: any) => (
+                  <div key={path.id} className="flex flex-col gap-1.5">
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs font-medium text-foreground truncate max-w-[160px]">
+                        {path.title}
+                      </span>
+                      <span className="text-xs text-muted-foreground ml-2 shrink-0">
+                        {path.progress_percentage}%
+                      </span>
+                    </div>
+                    <Progress
+                      value={path.progress_percentage}
+                      className="h-1.5"
+                    />
+                  </div>
+                ))}
+              </div>
+            )}
+          </CardContent>
+        </Card>
 
-            {/* Account Overview */}
-            <AnimatedCard delay={1.0}>
-              <CardHeader>
-                <CardTitle className="text-base">Your Account</CardTitle>
-                <CardDescription>Account details and membership information</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <dl className="grid gap-3 sm:grid-cols-2">
-                  <motion.div 
-                    className="flex flex-col gap-1 rounded-md border border-border px-4 py-3"
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.3, delay: 1.1 }}
+        {/* Bookmarks */}
+        <Card id="bookmarks">
+          <CardHeader className="pb-3">
+            <CardTitle className="flex items-center gap-2 text-sm font-semibold">
+              <Bookmark className="h-4 w-4 text-primary" />
+              Saved Content
+            </CardTitle>
+            <CardDescription className="text-xs">Articles and stories you&apos;ve bookmarked</CardDescription>
+          </CardHeader>
+          <CardContent>
+            {userData.bookmarks.length === 0 ? (
+              <div className="flex flex-col items-center gap-3 py-8 text-center">
+                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-muted">
+                  <Bookmark className="h-6 w-6 text-muted-foreground" />
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-foreground">No bookmarks yet</p>
+                  <p className="text-xs text-muted-foreground mt-1">Bookmark articles to read later</p>
+                </div>
+                <Button asChild variant="outline" size="sm" className="rounded-xl">
+                  <Link href="/articles">Browse Articles</Link>
+                </Button>
+              </div>
+            ) : (
+              <div className="flex flex-col gap-2">
+                {userData.bookmarks.slice(0, 5).map((bookmark: any, i: number) => (
+                  <div
+                    key={i}
+                    className="flex items-center justify-between rounded-lg border border-border p-2.5 hover:bg-muted/50 transition-colors"
                   >
-                    <dt className="text-xs text-muted-foreground">Name</dt>
-                    <dd className="text-sm font-medium text-foreground">{user.name}</dd>
-                  </motion.div>
-                  <motion.div 
-                    className="flex flex-col gap-1 rounded-md border border-border px-4 py-3"
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.3, delay: 1.2 }}
-                  >
-                    <dt className="text-xs text-muted-foreground">Email</dt>
-                    <dd className="text-sm font-medium text-foreground">{user.email}</dd>
-                  </motion.div>
-                  <motion.div 
-                    className="flex flex-col gap-1 rounded-md border border-border px-4 py-3"
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.3, delay: 1.3 }}
-                  >
-                    <dt className="text-xs text-muted-foreground">Member Since</dt>
-                    <dd className="text-sm font-medium text-foreground">
-                      {new Date(user.created_at).toLocaleDateString("en-US", {
-                        year: "numeric",
-                        month: "long",
-                        day: "numeric",
-                      })}
-                    </dd>
-                  </motion.div>
-                  <motion.div 
-                    className="flex flex-col gap-1 rounded-md border border-border px-4 py-3"
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.3, delay: 1.4 }}
-                  >
-                    <dt className="text-xs text-muted-foreground">Role</dt>
-                    <dd className="text-sm font-medium capitalize text-foreground">{user.role}</dd>
-                  </motion.div>
-                </dl>
-              </CardContent>
-            </AnimatedCard>
+                    <div className="flex items-center gap-2.5 min-w-0">
+                      <Circle className="h-2 w-2 shrink-0 fill-primary text-primary" />
+                      <span className="text-xs font-medium text-foreground truncate">
+                        {bookmark.title}
+                      </span>
+                    </div>
+                    <Badge variant="secondary" className="text-[10px] ml-2 shrink-0 rounded-full">
+                      {bookmark.item_type}
+                    </Badge>
+                  </div>
+                ))}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* Notifications */}
+        <Card id="notifications">
+          <CardHeader className="pb-3">
+            <CardTitle className="flex items-center gap-2 text-sm font-semibold">
+              <Bell className="h-4 w-4 text-primary" />
+              Notifications
+            </CardTitle>
+            <CardDescription className="text-xs">Updates and alerts</CardDescription>
+          </CardHeader>
+          <CardContent>
+            {userData.notifications.length === 0 ? (
+              <div className="flex flex-col items-center gap-3 py-8 text-center">
+                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-muted">
+                  <Bell className="h-6 w-6 text-muted-foreground" />
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-foreground">All caught up</p>
+                  <p className="text-xs text-muted-foreground mt-1">No new notifications right now</p>
+                </div>
+              </div>
+            ) : (
+              <div className="flex flex-col gap-2">
+                {userData.notifications.slice(0, 4).map((notif: any) => (
+                  <div key={notif.id} className="rounded-lg border border-border p-3">
+                    <div className="flex items-start gap-2">
+                      <div className="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-primary" />
+                      <div>
+                        <p className="text-xs font-semibold text-foreground">{notif.title}</p>
+                        <p className="text-xs text-muted-foreground mt-0.5 leading-relaxed">
+                          {notif.message}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Achievements */}
+      <Card id="achievements">
+        <CardHeader className="pb-3">
+          <div className="flex items-center justify-between">
+            <div>
+              <CardTitle className="flex items-center gap-2 text-sm font-semibold">
+                <Trophy className="h-4 w-4 text-primary" />
+                Achievements
+              </CardTitle>
+              <CardDescription className="text-xs mt-1">Milestones you&apos;ve unlocked</CardDescription>
+            </div>
+            <Badge variant="secondary" className="rounded-full text-xs">
+              {achievements.filter((a) => a.check(userData)).length} / {achievements.length}
+            </Badge>
           </div>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+            {achievements.map((a) => {
+              const unlocked = a.check(userData)
+              const prog = a.progress ? a.progress(userData) : undefined
+              return (
+                <div
+                  key={a.id}
+                  className={`relative rounded-xl border p-4 flex flex-col items-center gap-2 text-center transition-all ${
+                    unlocked
+                      ? a.color
+                      : "border-border bg-muted/30 opacity-60"
+                  }`}
+                >
+                  {!unlocked && (
+                    <Lock className="absolute top-2 right-2 h-3 w-3 text-muted-foreground" />
+                  )}
+                  <span className="text-2xl">{a.icon}</span>
+                  <div>
+                    <p className="text-xs font-semibold text-foreground">{a.title}</p>
+                    <p className="text-[11px] text-muted-foreground mt-0.5 leading-relaxed">
+                      {a.description}
+                    </p>
+                  </div>
+                  {!unlocked && prog !== undefined && (
+                    <Progress value={prog} className="h-1 w-full" />
+                  )}
+                  {unlocked && (
+                    <Badge className="text-[10px] rounded-full px-2 py-0 h-auto capitalize">
+                      Unlocked
+                    </Badge>
+                  )}
+                </div>
+              )
+            })}
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Quick links */}
+      <div>
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-sm font-semibold text-foreground">Quick Access</h2>
+          <Link
+            href="/articles"
+            className="flex items-center gap-1 text-xs text-primary hover:underline"
+          >
+            All articles <ChevronRight className="h-3 w-3" />
+          </Link>
+        </div>
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          {quickLinks.map((link) => (
+            <Link key={link.title} href={link.href}>
+              <div className="group flex items-center gap-3 rounded-xl border border-border p-4 transition-all hover:border-primary/30 hover:bg-muted/40 hover:shadow-sm">
+                <div className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-xl ${link.color}`}>
+                  <link.icon className="h-4 w-4" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium text-foreground group-hover:text-primary transition-colors">
+                    {link.title}
+                  </p>
+                  <p className="text-xs text-muted-foreground truncate">{link.description}</p>
+                </div>
+                <ArrowRight className="h-4 w-4 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity shrink-0" />
+              </div>
+            </Link>
+          ))}
         </div>
       </div>
-    </LayoutWrapper>
+
+      {/* Topic explorer */}
+      <Card>
+        <CardHeader className="pb-3">
+          <CardTitle className="text-sm font-semibold">Explore Topics</CardTitle>
+          <CardDescription className="text-xs">Dive into a wealth-building category</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-6">
+            {topicLinks.map((t) => (
+              <Link key={t.href} href={t.href}>
+                <div className="flex flex-col items-center gap-2 rounded-xl border border-border p-3.5 text-center hover:border-primary/30 hover:bg-muted/40 transition-all group">
+                  <t.icon className={`h-5 w-5 ${t.color}`} />
+                  <span className="text-[11px] font-medium text-foreground group-hover:text-primary transition-colors leading-tight">
+                    {t.label}
+                  </span>
+                </div>
+              </Link>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Account overview */}
+      <Card>
+        <CardHeader className="pb-3">
+          <CardTitle className="text-sm font-semibold">Account Overview</CardTitle>
+          <CardDescription className="text-xs">Your membership details</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+            {[
+              { label: "Full Name", value: user.name },
+              { label: "Email", value: user.email },
+              {
+                label: "Member Since",
+                value: new Date(user.created_at).toLocaleDateString("en-US", {
+                  year: "numeric",
+                  month: "long",
+                  day: "numeric",
+                }),
+              },
+              { label: "Role", value: user.role, capitalize: true },
+            ].map((item) => (
+              <div
+                key={item.label}
+                className="flex flex-col gap-1 rounded-xl border border-border px-4 py-3"
+              >
+                <span className="text-[11px] text-muted-foreground">{item.label}</span>
+                <span className={`text-sm font-medium text-foreground truncate ${item.capitalize ? "capitalize" : ""}`}>
+                  {item.value}
+                </span>
+              </div>
+            ))}
+          </div>
+          <div className="mt-4 flex gap-2">
+            <Button asChild variant="outline" size="sm" className="rounded-xl">
+              <Link href="/profile">Edit Profile</Link>
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
   )
 }

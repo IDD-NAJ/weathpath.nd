@@ -1,27 +1,32 @@
-"use client"
-
-import { getCurrentUser } from "@/lib/auth"
 import { Navigation } from "@/components/navigation"
 import { CtaFooter } from "@/components/cta-footer"
 import { TrendingUp } from "lucide-react"
 import Link from "next/link"
+
+interface UserShape {
+  name: string
+  email: string
+  role: string
+}
 
 interface LayoutWrapperProps {
   children: React.ReactNode
   showFooter?: boolean
   showNavigation?: boolean
   className?: string
+  user?: UserShape | null
 }
 
 export function LayoutWrapper({ 
   children, 
   showFooter = true, 
   showNavigation = true,
-  className = "" 
+  className = "",
+  user = null,
 }: LayoutWrapperProps) {
   return (
     <div className={`min-h-screen bg-background ${className}`}>
-      {showNavigation && <Navigation user={null} />}
+      {showNavigation && <Navigation user={user} />}
       <main>{children}</main>
       {showFooter && <CtaFooter />}
     </div>
@@ -51,15 +56,17 @@ export function SimpleFooter() {
 export function SimpleLayoutWrapper({ 
   children, 
   showNavigation = true,
-  className = "" 
+  className = "",
+  user = null,
 }: { 
   children: React.ReactNode
   showNavigation?: boolean
-  className?: string 
+  className?: string
+  user?: UserShape | null
 }) {
   return (
     <div className={`min-h-screen bg-background ${className}`}>
-      {showNavigation && <Navigation user={null} />}
+      {showNavigation && <Navigation user={user} />}
       <main>{children}</main>
       <SimpleFooter />
     </div>
