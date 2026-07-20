@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 interface ScrollRevealProps {
   children: React.ReactNode;
@@ -10,6 +10,13 @@ interface ScrollRevealProps {
   animation?: 'fade-up' | 'scale-in' | 'slide-in-left' | 'slide-in-right';
 }
 
+const hiddenTransforms: Record<NonNullable<ScrollRevealProps['animation']>, string> = {
+  'fade-up': 'translateY(24px)',
+  'scale-in': 'scale(0.95)',
+  'slide-in-left': 'translateX(-30px)',
+  'slide-in-right': 'translateX(30px)',
+};
+
 export function ScrollReveal({
   children,
   className = '',
@@ -18,37 +25,40 @@ export function ScrollReveal({
   animation = 'fade-up',
 }: ScrollRevealProps) {
   const ref = useRef<HTMLDivElement>(null);
+  const [isVisible, setIsVisible] = useState(false);
 
   useEffect(() => {
+    const node = ref.current;
+    if (!node) return;
+
     const observer = new IntersectionObserver(
       ([entry]) => {
-        if (entry.isIntersecting && ref.current) {
-          ref.current.style.animation = `none`;
-          const animationClass = `animate-${animation}`;
-          const delayClass = delay > 0 ? `animate-${animation}-delay-${Math.round(delay * 10)}` : '';
-          
-          ref.current.classList.add(animationClass);
-          if (delayClass) ref.current.classList.add(delayClass);
+        if (entry.isIntersecting) {
+          setIsVisible(true);
           observer.unobserve(entry.target);
         }
       },
       { threshold: 0.1 }
     );
 
-    if (ref.current) {
-      ref.current.style.opacity = '0';
-      observer.observe(ref.current);
-    }
+    observer.observe(node);
 
     return () => {
-      if (ref.current) {
-        observer.unobserve(ref.current);
-      }
+      observer.unobserve(node);
     };
-  }, [animation, delay]);
+  }, []);
 
   return (
-    <div ref={ref} className={className}>
+    <div
+      ref={ref}
+      className={className}
+      style={{
+        opacity: isVisible ? 1 : 0,
+        transform: isVisible ? 'none' : hiddenTransforms[animation],
+        transition: `opacity ${duration}s ease ${delay}s, transform ${duration}s ease ${delay}s`,
+        willChange: 'opacity, transform',
+      }}
+    >
       {children}
     </div>
   );

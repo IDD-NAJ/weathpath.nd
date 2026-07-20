@@ -26,7 +26,7 @@ const faqItems: FAQItem[] = [
       'We recommend starting with the income stream that aligns with your skills and interests. Our learning paths guide you through each option. Most successful members combine 2-3 streams for maximum income generation.',
   },
   {
-    question: 'Is there a guarantee I&apos;ll make money?',
+    question: "Is there a guarantee I'll make money?",
     answer:
       'While we provide proven strategies from successful students, individual results vary based on effort and market conditions. We offer support and guidance to maximize your chances of success.',
   },
