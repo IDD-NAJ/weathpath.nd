@@ -242,13 +242,22 @@ export default function DashboardPage() {
             Continue your wealth-building journey
           </p>
         </div>
-        <Button asChild className="w-full sm:w-auto sm:self-end rounded-xl gap-2" size="sm">
-          <Link href="/#learn">
-            <BookOpen className="h-3.5 w-3.5" />
-            <span className="hidden sm:inline">Explore Learning Paths</span>
-            <span className="sm:hidden">Learn More</span>
-          </Link>
-        </Button>
+        <div className="flex gap-2 w-full sm:w-auto flex-col sm:flex-row">
+          <Button asChild className="sm:self-end rounded-xl gap-2" size="sm">
+            <Link href="/#learn">
+              <BookOpen className="h-3.5 w-3.5" />
+              <span className="hidden sm:inline">Explore Learning Paths</span>
+              <span className="sm:hidden">Learn More</span>
+            </Link>
+          </Button>
+          <Button asChild variant="outline" className="sm:self-end rounded-xl gap-2" size="sm">
+            <Link href="/dashboard/purchase-history">
+              <ShoppingBag className="h-3.5 w-3.5" />
+              <span className="hidden sm:inline">Purchase History</span>
+              <span className="sm:hidden">History</span>
+            </Link>
+          </Button>
+        </div>
       </div>
 
       {/* Stats grid */}
