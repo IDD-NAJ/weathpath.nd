@@ -2,16 +2,6 @@ import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import { ArrowLeft, Lock, BookOpen, CheckCircle2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { LessonViewer } from '@/components/lesson-viewer'
-import { SimpleLayoutWrapper } from '@/components/layout-wrapper'
-import { neon } from '@neondatabase/serverless'
-import { verifyPurchaseAccess } from '@/lib/purchase-service'
-import { headers } from 'next/headers'
-
-import { notFound } from 'next/navigation'
-import Link from 'next/link'
-import { ArrowLeft, Lock, BookOpen, CheckCircle2 } from 'lucide-react'
-import { Button } from '@/components/ui/button'
 import { LessonViewerWrapper } from '@/components/lesson-viewer-wrapper'
 import { SimpleLayoutWrapper } from '@/components/layout-wrapper'
 import { neon } from '@neondatabase/serverless'
@@ -210,3 +200,4 @@ export default async function LessonViewerPage({
       </main>
     </SimpleLayoutWrapper>
   )
+}
