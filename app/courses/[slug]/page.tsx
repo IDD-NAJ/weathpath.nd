@@ -38,6 +38,10 @@ export default async function CourseDetailPage({
   const resolvedParams = await params
   const resolvedSearchParams = await searchParams
   let course = null
+  let lessons: any[] = []
+  let lessonCount = 0
+  let totalMinutes = 0
+
   try {
     const sql = neon(process.env.DATABASE_URL!)
     const result = await sql(
@@ -46,6 +50,17 @@ export default async function CourseDetailPage({
     )
     console.log('[v0] Course query result:', result.length, 'for slug:', resolvedParams.slug)
     course = result[0]
+
+    if (course) {
+      // Fetch lessons to get actual count and duration
+      const lessonsResult = await sql(
+        "SELECT id, duration_minutes FROM lessons WHERE course_id = $1 AND is_published = true ORDER BY order_index ASC",
+        [course.id]
+      )
+      lessons = lessonsResult
+      lessonCount = lessons.length
+      totalMinutes = lessons.reduce((sum: number, l: any) => sum + (l.duration_minutes || 0), 0)
+    }
   } catch (error: any) {
     console.error('[v0] Failed to fetch course:', error.message)
   }
@@ -59,7 +74,7 @@ export default async function CourseDetailPage({
   const email = resolvedSearchParams.email
   const hasPurchased = email ? await verifyPurchaseAccess(course.id, email) : false
 
-  const benefits = [
+  const benefits = course.what_you_get?.items || [
     "Lifetime access to course materials",
     "Delivered directly to your email",
     "Expert-written methods and strategies",
@@ -120,21 +135,21 @@ export default async function CourseDetailPage({
                     <Clock className="h-4 w-4 text-muted-foreground" />
                     <div>
                       <p className="text-xs text-muted-foreground">Duration</p>
-                      <p className="font-semibold text-foreground">4-8 weeks</p>
+                      <p className="font-semibold text-foreground">{course.duration || '4-8 weeks'}</p>
                     </div>
                   </div>
                   <div className="flex items-center gap-2">
-                    <Users className="h-4 w-4 text-muted-foreground" />
+                    <Play className="h-4 w-4 text-muted-foreground" />
                     <div>
-                      <p className="text-xs text-muted-foreground">Students</p>
-                      <p className="font-semibold text-foreground">2,500+</p>
+                      <p className="text-xs text-muted-foreground">Lessons</p>
+                      <p className="font-semibold text-foreground">{lessonCount || course.lessons || 0}</p>
                     </div>
                   </div>
                   <div className="flex items-center gap-2">
-                    <Star className="h-4 w-4 text-yellow-500" />
+                    <Clock className="h-4 w-4 text-yellow-500" />
                     <div>
-                      <p className="text-xs text-muted-foreground">Rating</p>
-                      <p className="font-semibold text-foreground">4.9/5</p>
+                      <p className="text-xs text-muted-foreground">Total Time</p>
+                      <p className="font-semibold text-foreground">{totalMinutes} min</p>
                     </div>
                   </div>
                 </div>

@@ -14,6 +14,7 @@ import { Button } from "@/components/ui/button"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Progress } from "@/components/ui/progress"
 import Link from "next/link"
+import { MyCoursesSection } from "@/components/my-courses-section"
 
 interface UserData {
   progress: Array<any>
@@ -279,6 +280,9 @@ export default function DashboardPage() {
           trend={latestScore !== "N/A" ? "Latest" : undefined}
         />
       </div>
+
+      {/* My Courses Section */}
+      <MyCoursesSection />
 
       {/* Main content grid */}
       <div className="grid gap-6 lg:grid-cols-3">
