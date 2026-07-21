@@ -2,17 +2,22 @@ import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import { ArrowLeft, Lock, BookOpen, CheckCircle2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { LessonViewer } from '@/components/lesson-viewer'
 import { SimpleLayoutWrapper } from '@/components/layout-wrapper'
 import { neon } from '@neondatabase/serverless'
 import { verifyPurchaseAccess } from '@/lib/purchase-service'
 import { headers } from 'next/headers'
 
-export const dynamic = 'force-dynamic'
+import { notFound } from 'next/navigation'
+import Link from 'next/link'
+import { ArrowLeft, Lock, BookOpen, CheckCircle2 } from 'lucide-react'
+import { Button } from '@/components/ui/button'
+import { LessonViewerWrapper } from '@/components/lesson-viewer-wrapper'
+import { SimpleLayoutWrapper } from '@/components/layout-wrapper'
+import { neon } from '@neondatabase/serverless'
+import { verifyPurchaseAccess } from '@/lib/purchase-service'
 
-interface CourseModuleItem {
-  title: string
-  lessons: string[]
-}
+export const dynamic = 'force-dynamic'
 
 export default async function LessonViewerPage({
   params,
@@ -27,16 +32,25 @@ export default async function LessonViewerPage({
   const selectedLesson = resolvedSearchParams.lesson
 
   let course = null
+  let lessons: any[] = []
 
   try {
     const sql = neon(process.env.DATABASE_URL!)
-    const result = await sql(
+    const courseResult = await sql(
       'SELECT id, slug, title, description, cover_image, download_url FROM courses WHERE slug = $1',
       [resolvedParams.slug]
     )
-    course = result[0]
+    course = courseResult[0]
+
+    if (course) {
+      const lessonsResult = await sql(
+        'SELECT id, course_id, title, description, content, order_index, duration_minutes, video_url, lesson_type, is_published FROM lessons WHERE course_id = $1 AND is_published = true ORDER BY order_index ASC',
+        [course.id]
+      )
+      lessons = lessonsResult
+    }
   } catch (error) {
-    console.error('[v0] Failed to fetch course:', error)
+    console.error('[v0] Failed to fetch course or lessons:', error)
   }
 
   if (!course) {
@@ -124,26 +138,9 @@ export default async function LessonViewerPage({
     )
   }
 
-  // Sample course modules and lessons
-  const courseModules: CourseModuleItem[] = [
-    {
-      title: 'Module 1: Introduction',
-      lessons: ['Getting Started', 'Core Concepts', 'Setting Expectations'],
-    },
-    {
-      title: 'Module 2: Fundamentals',
-      lessons: ['Part 1: Basics', 'Part 2: Advanced Basics', 'Q&A Session'],
-    },
-    {
-      title: 'Module 3: Implementation',
-      lessons: [
-        'Step-by-Step Guide',
-        'Common Mistakes',
-        'Best Practices',
-        'Tools & Resources',
-      ],
-    },
-  ]
+  const initialLessonIndex = selectedLesson 
+    ? lessons.findIndex(l => l.id === parseInt(selectedLesson))
+    : 0
 
   return (
     <SimpleLayoutWrapper>
@@ -167,19 +164,19 @@ export default async function LessonViewerPage({
 
         {/* Content */}
         <div className="mx-auto max-w-7xl px-6 py-12">
-          {/* Hero */}
-          <div className="space-y-6 mb-12">
+          {/* Header */}
+          <div className="space-y-6 mb-8">
             <div>
-              <h1 className="font-serif text-4xl font-bold text-foreground mb-2">
+              <h1 className="text-3xl md:text-4xl font-bold text-foreground mb-2">
                 {course.title}
               </h1>
               <p className="text-lg text-muted-foreground">
-                Access all course materials and lessons
+                {lessons.length} lessons • {lessons.reduce((sum, l) => sum + (l.duration_minutes || 0), 0)} minutes total
               </p>
             </div>
 
             {/* Access Info */}
-            <div className="rounded-sm border border-green-500/30 bg-green-500/10 p-4 flex items-center gap-3">
+            <div className="rounded-lg border border-green-500/30 bg-green-500/10 p-4 flex items-center gap-3">
               <CheckCircle2 className="h-5 w-5 text-green-600 shrink-0" />
               <div>
                 <p className="font-semibold text-foreground">
@@ -192,131 +189,24 @@ export default async function LessonViewerPage({
             </div>
           </div>
 
-          {/* Course Content Grid */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            {/* Main Lesson Viewer */}
-            <div className="lg:col-span-2 space-y-6">
-              {/* Featured Content */}
-              <div className="rounded-sm border border-border bg-card p-8 space-y-6">
-                <div className="rounded-sm overflow-hidden border border-border">
-                  <img
-                    src={course.cover_image}
-                    alt={course.title}
-                    className="w-full h-64 object-cover"
-                  />
-                </div>
-
-                <div className="space-y-4">
-                  <h2 className="font-serif text-2xl font-bold text-foreground">
-                    Welcome to {course.title}
-                  </h2>
-                  <p className="text-muted-foreground leading-relaxed">
-                    {course.description}
-                  </p>
-                </div>
-
-                {course.download_url && (
-                  <Button
-                    asChild
-                    className="w-full gap-2 bg-primary rounded-sm py-6"
-                  >
-                    <a href={course.download_url} download>
-                      <BookOpen className="h-5 w-5" />
-                      Download Course Materials
-                    </a>
-                  </Button>
-                )}
-              </div>
-
-              {/* Course Overview */}
-              <div className="rounded-sm border border-border bg-card p-8 space-y-6">
-                <h3 className="font-serif text-xl font-bold text-foreground">
-                  What You'll Learn
-                </h3>
-                <ul className="space-y-3">
-                  <li className="flex items-start gap-3">
-                    <CheckCircle2 className="h-5 w-5 text-primary shrink-0 mt-0.5" />
-                    <span className="text-muted-foreground">
-                      Complete foundations and advanced concepts
-                    </span>
-                  </li>
-                  <li className="flex items-start gap-3">
-                    <CheckCircle2 className="h-5 w-5 text-primary shrink-0 mt-0.5" />
-                    <span className="text-muted-foreground">
-                      Real-world implementation strategies
-                    </span>
-                  </li>
-                  <li className="flex items-start gap-3">
-                    <CheckCircle2 className="h-5 w-5 text-primary shrink-0 mt-0.5" />
-                    <span className="text-muted-foreground">
-                      Lifetime access to all materials
-                    </span>
-                  </li>
-                  <li className="flex items-start gap-3">
-                    <CheckCircle2 className="h-5 w-5 text-primary shrink-0 mt-0.5" />
-                    <span className="text-muted-foreground">
-                      Expert guidance and best practices
-                    </span>
-                  </li>
-                </ul>
-              </div>
+          {/* Lessons - Use client-side component for interactivity */}
+          {lessons.length > 0 ? (
+            <LessonViewerWrapper
+              lessons={lessons}
+              courseTitle={course.title}
+              initialLessonIndex={initialLessonIndex}
+              userHasAccess={hasAccess}
+            />
+          ) : (
+            <div className="rounded-lg border border-border bg-card p-8 text-center">
+              <BookOpen className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+              <h3 className="text-lg font-semibold text-foreground mb-2">No lessons available</h3>
+              <p className="text-muted-foreground">
+                The instructor hasn't added lessons to this course yet. Check back soon!
+              </p>
             </div>
-
-            {/* Modules Sidebar */}
-            <div className="space-y-4">
-              <h3 className="font-serif text-lg font-bold text-foreground">
-                Course Modules
-              </h3>
-              <div className="space-y-3">
-                {courseModules.map((module, idx) => (
-                  <div
-                    key={idx}
-                    className="rounded-sm border border-border bg-card p-4 space-y-3"
-                  >
-                    <h4 className="font-semibold text-foreground text-sm">
-                      {module.title}
-                    </h4>
-                    <ul className="space-y-2">
-                      {module.lessons.map((lesson, lidx) => (
-                        <li
-                          key={lidx}
-                          className="flex items-center gap-2 text-sm"
-                        >
-                          <CheckCircle2 className="h-4 w-4 text-primary shrink-0" />
-                          <span className="text-muted-foreground">
-                            {lesson}
-                          </span>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                ))}
-              </div>
-
-              {/* Course Features */}
-              <div className="rounded-sm border border-border bg-card p-4 space-y-3">
-                <h4 className="font-semibold text-foreground text-sm">
-                  Course Features
-                </h4>
-                <ul className="space-y-2 text-sm text-muted-foreground">
-                  <li className="flex items-center gap-2">
-                    <BookOpen className="h-4 w-4 text-primary" />
-                    Full course access
-                  </li>
-                  <li className="flex items-center gap-2">
-                    <CheckCircle2 className="h-4 w-4 text-primary" />
-                    Lifetime access
-                  </li>
-                  <li className="flex items-center gap-2">
-                    <BookOpen className="h-4 w-4 text-primary" />
-                    Expert support
-                  </li>
-                </ul>
-              </div>
-            </div>
-          </div>
+          )}
         </div>
       </main>
     </SimpleLayoutWrapper>
   )
-}

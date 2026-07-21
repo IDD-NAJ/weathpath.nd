@@ -58,7 +58,8 @@ async function runAllMigrations() {
       '005-add-enhanced-features.sql',
       '006-add-profile-photos.sql',
       '011-create-topics-table.sql',
-      '012-seed-articles-topics.sql'
+      '012-seed-articles-topics.sql',
+      '013-seed-comprehensive-courses.sql'
     ]
     
     for (const migration of migrations) {
