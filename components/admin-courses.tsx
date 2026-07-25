@@ -84,10 +84,15 @@ export function AdminCourses() {
           level: "beginner",
           lessons: 10,
         })
+        alert("Course saved successfully")
+      } else {
+        const error = await res.json()
+        console.error("[v0] API error:", error)
+        alert(error.error || "Failed to save course")
       }
     } catch (err) {
       console.error("[v0] Failed to save course:", err)
-      alert("Failed to save course")
+      alert("Failed to save course: " + (err instanceof Error ? err.message : "Unknown error"))
     }
   }
 

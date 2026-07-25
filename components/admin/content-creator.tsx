@@ -92,9 +92,9 @@ export function ContentCreator() {
         body: JSON.stringify({
           title: formData.title,
           description: formData.description,
+          excerpt: formData.description,
           content: formData.content,
           slug: formData.slug,
-          author_name: formData.authorName,
           status: formData.status,
         }),
       })

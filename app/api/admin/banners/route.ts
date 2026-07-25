@@ -17,20 +17,20 @@ export async function GET() {
 
 export async function POST(request: NextRequest) {
   try {
-    const { title, content, type, startDate, endDate, isActive } = await request.json()
+    const { title, message, bannerType, linkUrl, linkText, bgColor, startsAt, endsAt, isActive } = await request.json()
 
-    if (!title || !content) {
+    if (!title || !message) {
       return NextResponse.json(
-        { error: 'Title and content are required' },
+        { error: 'Title and message are required' },
         { status: 400 }
       )
     }
 
     const banner = await sql(
-      `INSERT INTO banners (title, content, type, start_date, end_date, is_active, created_at)
-       VALUES ($1, $2, $3, $4, $5, $6, NOW())
+      `INSERT INTO banners (title, message, banner_type, link_url, link_text, bg_color, is_active, starts_at, ends_at, created_at)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, NOW())
        RETURNING *`,
-      [title, content, type || 'announcement', startDate || null, endDate || null, isActive !== false]
+      [title, message, bannerType || 'announcement', linkUrl || null, linkText || null, bgColor || '#1f2937', isActive !== false, startsAt || null, endsAt || null]
     )
 
     return NextResponse.json(banner[0])

@@ -7,10 +7,13 @@ import { Button } from '@/components/ui/button'
 interface Banner {
   id: number
   title: string
-  content: string
-  type: 'announcement' | 'campaign' | 'promotion'
-  start_date: string | null
-  end_date: string | null
+  message: string
+  banner_type: 'announcement' | 'campaign' | 'promotion'
+  link_url: string | null
+  link_text: string | null
+  bg_color: string
+  starts_at: string | null
+  ends_at: string | null
   is_active: boolean
 }
 
@@ -34,8 +37,8 @@ export function HomeBanners() {
           const now = new Date()
           const active = data.filter((banner: Banner) => {
             if (!banner.is_active) return false
-            if (banner.start_date && new Date(banner.start_date) > now) return false
-            if (banner.end_date && new Date(banner.end_date) < now) return false
+            if (banner.starts_at && new Date(banner.starts_at) > now) return false
+            if (banner.ends_at && new Date(banner.ends_at) < now) return false
             return true
           })
           setBanners(active)
@@ -66,16 +69,21 @@ export function HomeBanners() {
         <div
           key={banner.id}
           className={`relative rounded-lg p-4 flex items-start justify-between gap-4 ${
-            banner.type === 'announcement'
+            banner.banner_type === 'announcement'
               ? 'bg-blue-500/10 border border-blue-500/20'
-              : banner.type === 'campaign'
+              : banner.banner_type === 'campaign'
               ? 'bg-purple-500/10 border border-purple-500/20'
               : 'bg-green-500/10 border border-green-500/20'
           }`}
         >
           <div className="flex-1">
             <h3 className="font-semibold text-foreground">{banner.title}</h3>
-            <p className="text-sm text-muted-foreground mt-1">{banner.content}</p>
+            <p className="text-sm text-muted-foreground mt-1">{banner.message}</p>
+            {banner.link_url && (
+              <a href={banner.link_url} className="text-sm text-primary hover:underline mt-2 inline-block">
+                {banner.link_text || 'Learn more'}
+              </a>
+            )}
           </div>
           <Button
             variant="ghost"

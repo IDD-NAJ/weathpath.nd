@@ -44,7 +44,7 @@ export async function POST(request: NextRequest) {
     const user = await requireAdmin()
     const body = await request.json()
     
-    const { title, content, excerpt, description, category, slug, author_name, status } = body
+    const { title, content, excerpt, description, category, slug, status } = body
     
     if (!title || !slug) {
       return NextResponse.json({ error: 'Title and slug are required' }, { status: 400 })
@@ -52,10 +52,10 @@ export async function POST(request: NextRequest) {
     
     const result = await sql`
       INSERT INTO articles (
-        title, slug, content, description, author_name, status, created_at
+        title, slug, content, excerpt, category, author_id, status, is_published, created_at, updated_at
       ) VALUES (
-        ${title}, ${slug}, ${content || ''}, ${description || excerpt || ''}, ${author_name || user.name || 'Admin'}, 
-        ${status || 'draft'}, NOW()
+        ${title}, ${slug}, ${content || ''}, ${excerpt || description || ''}, ${category || 'General'}, 
+        ${user.id}, ${status || 'draft'}, ${status === 'published'}, NOW(), NOW()
       )
       RETURNING *
     `

@@ -8,21 +8,24 @@ export async function PUT(
   { params }: { params: { id: string } }
 ) {
   try {
-    const { title, content, type, startDate, endDate, isActive } = await request.json()
+    const { title, message, bannerType, linkUrl, linkText, bgColor, startsAt, endsAt, isActive } = await request.json()
     const bannerId = parseInt(params.id)
 
     const banner = await sql(
       `UPDATE banners SET 
         title = COALESCE($1, title),
-        content = COALESCE($2, content),
-        type = COALESCE($3, type),
-        start_date = COALESCE($4, start_date),
-        end_date = COALESCE($5, end_date),
-        is_active = COALESCE($6, is_active),
+        message = COALESCE($2, message),
+        banner_type = COALESCE($3, banner_type),
+        link_url = COALESCE($4, link_url),
+        link_text = COALESCE($5, link_text),
+        bg_color = COALESCE($6, bg_color),
+        starts_at = COALESCE($7, starts_at),
+        ends_at = COALESCE($8, ends_at),
+        is_active = COALESCE($9, is_active),
         updated_at = NOW()
-       WHERE id = $7
+       WHERE id = $10
        RETURNING *`,
-      [title, content, type, startDate, endDate, isActive, bannerId]
+      [title, message, bannerType, linkUrl, linkText, bgColor, startsAt, endsAt, isActive, bannerId]
     )
 
     if (banner.length === 0) {

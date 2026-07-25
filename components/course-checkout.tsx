@@ -96,7 +96,11 @@ export function CourseCheckout({ course }: { course: Course }) {
             className="rounded-sm"
           />
           <p className="text-xs text-muted-foreground">
-            We'll send your course access to this email
+            We'll send your course access to this email. Purchase as a guest or{' '}
+            <a href="/signup" className="text-primary hover:underline">
+              create an account
+            </a>{' '}
+            to save your progress.
           </p>
         </div>
 

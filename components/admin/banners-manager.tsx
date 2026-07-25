@@ -23,11 +23,14 @@ import {
 interface Banner {
   id: number
   title: string
-  content: string
-  type: 'announcement' | 'campaign' | 'promotion'
-  start_date: string | null
-  end_date: string | null
+  message: string
+  banner_type: 'announcement' | 'campaign' | 'promotion'
+  link_url: string | null
+  link_text: string | null
+  bg_color: string
   is_active: boolean
+  starts_at: string | null
+  ends_at: string | null
   created_at: string
   updated_at?: string
 }
@@ -39,10 +42,13 @@ export function BannersManager() {
   const [editingId, setEditingId] = useState<number | null>(null)
   const [formData, setFormData] = useState({
     title: '',
-    content: '',
-    type: 'announcement' as const,
-    startDate: '',
-    endDate: '',
+    message: '',
+    bannerType: 'announcement' as const,
+    linkUrl: '',
+    linkText: '',
+    bgColor: '#1f2937',
+    startsAt: '',
+    endsAt: '',
     isActive: true,
   })
 
@@ -73,8 +79,8 @@ export function BannersManager() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           ...formData,
-          startDate: formData.startDate || null,
-          endDate: formData.endDate || null,
+          startsAt: formData.startsAt || null,
+          endsAt: formData.endsAt || null,
         }),
       })
 
@@ -84,10 +90,13 @@ export function BannersManager() {
         setEditingId(null)
         setFormData({
           title: '',
-          content: '',
-          type: 'announcement',
-          startDate: '',
-          endDate: '',
+          message: '',
+          bannerType: 'announcement',
+          linkUrl: '',
+          linkText: '',
+          bgColor: '#1f2937',
+          startsAt: '',
+          endsAt: '',
           isActive: true,
         })
       }
@@ -102,10 +111,13 @@ export function BannersManager() {
     setEditingId(banner.id)
     setFormData({
       title: banner.title,
-      content: banner.content,
-      type: banner.type as any,
-      startDate: banner.start_date ? banner.start_date.split('T')[0] : '',
-      endDate: banner.end_date ? banner.end_date.split('T')[0] : '',
+      message: banner.message,
+      bannerType: banner.banner_type,
+      linkUrl: banner.link_url || '',
+      linkText: banner.link_text || '',
+      bgColor: banner.bg_color || '#1f2937',
+      startsAt: banner.starts_at ? banner.starts_at.split('T')[0] : '',
+      endsAt: banner.ends_at ? banner.ends_at.split('T')[0] : '',
       isActive: banner.is_active,
     })
     setShowDialog(true)
@@ -128,10 +140,13 @@ export function BannersManager() {
     setEditingId(null)
     setFormData({
       title: '',
-      content: '',
-      type: 'announcement',
-      startDate: '',
-      endDate: '',
+      message: '',
+      bannerType: 'announcement',
+      linkUrl: '',
+      linkText: '',
+      bgColor: '#1f2937',
+      startsAt: '',
+      endsAt: '',
       isActive: true,
     })
     setShowDialog(true)
@@ -169,13 +184,13 @@ export function BannersManager() {
                     {banner.type}
                   </span>
                 </div>
-                <p className="text-sm text-muted-foreground line-clamp-2">{banner.content}</p>
+                <p className="text-sm text-muted-foreground line-clamp-2">{banner.message}</p>
                 <div className="mt-2 flex items-center gap-4 text-xs text-muted-foreground">
-                  {banner.start_date && (
-                    <span>Start: {new Date(banner.start_date).toLocaleDateString()}</span>
+                  {banner.starts_at && (
+                    <span>Start: {new Date(banner.starts_at).toLocaleDateString()}</span>
                   )}
-                  {banner.end_date && (
-                    <span>End: {new Date(banner.end_date).toLocaleDateString()}</span>
+                  {banner.ends_at && (
+                    <span>End: {new Date(banner.ends_at).toLocaleDateString()}</span>
                   )}
                 </div>
               </div>
@@ -222,11 +237,11 @@ export function BannersManager() {
             </div>
 
             <div>
-              <label className="text-sm font-medium">Content</label>
+              <label className="text-sm font-medium">Message</label>
               <Textarea
-                value={formData.content}
-                onChange={(e) => setFormData({ ...formData, content: e.target.value })}
-                placeholder="Banner content"
+                value={formData.message}
+                onChange={(e) => setFormData({ ...formData, message: e.target.value })}
+                placeholder="Banner message"
                 rows={4}
                 className="mt-1"
               />
@@ -235,7 +250,7 @@ export function BannersManager() {
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <label className="text-sm font-medium">Type</label>
-                <Select value={formData.type} onValueChange={(value: any) => setFormData({ ...formData, type: value })}>
+                <Select value={formData.bannerType} onValueChange={(value: any) => setFormData({ ...formData, bannerType: value })}>
                   <SelectTrigger className="mt-1">
                     <SelectValue />
                   </SelectTrigger>
@@ -265,8 +280,8 @@ export function BannersManager() {
                 <label className="text-sm font-medium">Start Date (Optional)</label>
                 <Input
                   type="date"
-                  value={formData.startDate}
-                  onChange={(e) => setFormData({ ...formData, startDate: e.target.value })}
+                  value={formData.startsAt}
+                  onChange={(e) => setFormData({ ...formData, startsAt: e.target.value })}
                   className="mt-1"
                 />
               </div>
@@ -275,8 +290,8 @@ export function BannersManager() {
                 <label className="text-sm font-medium">End Date (Optional)</label>
                 <Input
                   type="date"
-                  value={formData.endDate}
-                  onChange={(e) => setFormData({ ...formData, endDate: e.target.value })}
+                  value={formData.endsAt}
+                  onChange={(e) => setFormData({ ...formData, endsAt: e.target.value })}
                   className="mt-1"
                 />
               </div>
@@ -286,7 +301,7 @@ export function BannersManager() {
               <Button variant="outline" onClick={() => setShowDialog(false)}>
                 Cancel
               </Button>
-              <Button onClick={handleSave} disabled={loading || !formData.title || !formData.content}>
+              <Button onClick={handleSave} disabled={loading || !formData.title || !formData.message}>
                 {loading ? 'Saving...' : 'Save Banner'}
               </Button>
             </div>

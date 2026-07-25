@@ -44,9 +44,9 @@ export async function POST(request: NextRequest) {
     const user = await requireAdmin()
     const body = await request.json()
     
-    const { name, title, quote, income, strategy, slug, description, content, author_name, status } = body
+    const { name, title, quote, income, strategy, slug, description, content, status } = body
     
-    // Support both old format (name, quote) and new format (title, description, content)
+    // Support both old format (name, quote) and new format (title, content)
     const finalTitle = title || name
     const finalContent = content || quote
     
@@ -58,10 +58,10 @@ export async function POST(request: NextRequest) {
     
     const result = await sql`
       INSERT INTO success_stories (
-        name, title, content, description, income, strategy, slug, author_name, status, created_at
+        name, title, content, quote, summary, income, strategy, slug, author_id, status, is_published, created_at, updated_at
       ) VALUES (
-        ${name || author_name}, ${finalTitle}, ${finalContent}, ${description || quote || ''}, ${income || ''}, ${strategy || ''}, 
-        ${generatedSlug}, ${author_name || user.name || 'Admin'}, ${status || 'draft'}, NOW()
+        ${name}, ${finalTitle}, ${finalContent}, ${quote || finalContent}, ${description || ''}, ${income || ''}, ${strategy || ''}, 
+        ${generatedSlug}, ${user.id}, ${status || 'draft'}, ${status === 'published'}, NOW(), NOW()
       )
       RETURNING *
     `

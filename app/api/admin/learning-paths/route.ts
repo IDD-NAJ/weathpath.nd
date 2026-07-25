@@ -54,10 +54,10 @@ export async function POST(request: NextRequest) {
     
     const result = await sql`
       INSERT INTO learning_paths (
-        title, slug, description, content, difficulty, duration, author_name, status, created_at
+        title, slug, description, content, difficulty, duration, author_id, status, is_published, created_at, updated_at
       ) VALUES (
         ${title}, ${generatedSlug}, ${description || ''}, ${content || ''}, ${difficulty || 'beginner'}, 
-        ${duration || '30 mins'}, ${author_name || user.name || 'Admin'}, ${status || 'draft'}, NOW()
+        ${duration || '30 mins'}, ${user.id}, ${status || 'draft'}, ${status === 'published'}, NOW(), NOW()
       )
       RETURNING *
     `
