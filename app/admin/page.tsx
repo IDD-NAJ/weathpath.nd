@@ -36,6 +36,7 @@ import { ActivityChart } from "@/components/charts/activity-chart"
 import { ProgressDonut } from "@/components/charts/progress-donut"
 import { AnalyticsBar } from "@/components/charts/analytics-bar"
 import { AnimatedProgress } from "@/components/ui/animated-progress"
+import { AdminCourses } from "@/components/admin-courses"
 
 interface AdminStats {
   users: {
@@ -191,6 +192,31 @@ export default function AdminOverviewPage() {
           color="#8884d8"
         />
       </div>
+
+      {/* Course Management Section */}
+      <AnimatedCard delay={0.65}>
+        <CardHeader>
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <div>
+              <CardTitle className="flex items-center gap-2 text-base">
+                <BookOpen className="h-4 w-4" />
+                Course Management
+              </CardTitle>
+              <CardDescription>Create, edit, or delete courses directly from the dashboard</CardDescription>
+            </div>
+            <Link
+              href="/admin/courses"
+              className="inline-flex items-center gap-1 text-sm text-primary hover:text-primary/80"
+            >
+              Full course manager
+              <ArrowRight className="h-4 w-4" />
+            </Link>
+          </div>
+        </CardHeader>
+        <CardContent>
+          <AdminCourses />
+        </CardContent>
+      </AnimatedCard>
 
       {/* Content Drafts Section */}
       <AnimatedCard delay={0.7}>
@@ -462,6 +488,9 @@ export default function AdminOverviewPage() {
           <CardContent>
             <div className="grid grid-cols-2 gap-3">
               {[
+                { label: "Manage Courses", href: "/admin/courses", icon: BookOpen },
+                { label: "Coupons", href: "/admin/coupons", icon: Target },
+                { label: "Review Moderation", href: "/admin/reviews", icon: Star },
                 { label: "Manage Drafts", href: "/admin/drafts", icon: FileEdit },
                 { label: "Review Content", href: "/admin/approvals", icon: ShieldCheck },
                 { label: "User Analytics", href: "/admin/analytics", icon: BarChart3 },

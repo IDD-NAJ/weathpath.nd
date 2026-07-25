@@ -9,6 +9,8 @@ import { CourseModules } from "@/components/course-modules"
 import { neon } from "@neondatabase/serverless"
 import { verifyPurchaseAccess } from "@/lib/purchase-service"
 import { headers } from "next/headers"
+import { ViewTracker } from "@/components/view-tracker"
+import { ReviewsSection } from "@/components/reviews-section"
 
 export const dynamic = 'force-dynamic'
 
@@ -42,6 +44,7 @@ export default async function CourseDetailPage({
   let lessons: any[] = []
   let lessonCount = 0
   let totalMinutes = 0
+  let relatedCourses: any[] = []
 
   try {
     const sql = neon(process.env.DATABASE_URL!)
@@ -61,6 +64,16 @@ export default async function CourseDetailPage({
       lessons = lessonsResult
       lessonCount = lessons.length
       totalMinutes = lessons.reduce((sum: number, l: any) => sum + (l.duration_minutes || 0), 0)
+
+      // Related courses (same category first)
+      relatedCourses = await sql(
+        `SELECT id, slug, title, description, price_cents, cover_image, category
+         FROM courses
+         WHERE id != $1
+         ORDER BY (category = $2) DESC, created_at DESC
+         LIMIT 3`,
+        [course.id, course.category]
+      )
     }
   } catch (error: any) {
     console.error('[v0] Failed to fetch course:', error.message)
@@ -80,7 +93,7 @@ export default async function CourseDetailPage({
     "Delivered directly to your email",
     "Expert-written methods and strategies",
     "Instant download after purchase",
-    "30-day money-back guarantee",
+    "7-day money-back guarantee",
     "Join our exclusive community",
   ]
 
@@ -126,6 +139,7 @@ export default async function CourseDetailPage({
                 <p className="text-lg text-muted-foreground leading-relaxed">
                   {course.description}
                 </p>
+                <ViewTracker contentType="course" contentId={String(course.id)} />
                 <p className="font-serif text-3xl font-bold text-primary">
                   ${(course.price_cents / 100).toFixed(2)}
                 </p>
@@ -209,8 +223,13 @@ export default async function CourseDetailPage({
               {/* Guarantee */}
               <div className="rounded-sm border border-primary/30 bg-primary/5 p-6">
                 <p className="text-sm text-foreground">
-                  <strong>Money-Back Guarantee:</strong> Not satisfied? Get a full refund within 30 days. No questions asked.
+                  <strong>Money-Back Guarantee:</strong> Not satisfied? Get a full refund within 7 days. No questions asked.
                 </p>
+              </div>
+
+              {/* Reviews */}
+              <div className="pt-8 border-t border-border">
+                <ReviewsSection contentType="course" contentId={String(course.id)} title="Student Reviews" />
               </div>
             </div>
 
@@ -246,6 +265,39 @@ export default async function CourseDetailPage({
               )}
             </div>
           </div>
+
+          {/* Related courses */}
+          {relatedCourses.length > 0 && (
+            <div className="mt-20 border-t border-border pt-12">
+              <h2 className="mb-8 font-serif text-2xl font-bold text-foreground">You Might Also Like</h2>
+              <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
+                {relatedCourses.map((rc: any) => (
+                  <Link
+                    key={rc.id}
+                    href={`/courses/${rc.slug}`}
+                    className="group flex flex-col overflow-hidden rounded-sm border border-border bg-card transition-all duration-300 hover:shadow-lg"
+                  >
+                    <div className="relative h-40 overflow-hidden bg-muted">
+                      <img
+                        src={rc.cover_image || "/placeholder.svg"}
+                        alt={rc.title}
+                        className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+                      />
+                    </div>
+                    <div className="flex flex-1 flex-col p-5">
+                      <h3 className="line-clamp-2 font-serif text-lg font-bold text-foreground transition-colors group-hover:text-primary">
+                        {rc.title}
+                      </h3>
+                      <p className="mt-2 line-clamp-2 flex-1 text-sm text-muted-foreground">{rc.description}</p>
+                      <p className="mt-4 font-serif text-xl font-bold text-primary">
+                        ${(rc.price_cents / 100).toFixed(2)}
+                      </p>
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
       </main>
     </SimpleLayoutWrapper>

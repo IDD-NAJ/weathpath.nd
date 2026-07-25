@@ -1,11 +1,12 @@
-import { stripe } from '@/lib/stripe'
+import { getStripe } from '@/lib/stripe'
 import { getProductById, validateProductPrice } from '@/lib/products'
+import { sql } from '@/lib/db'
 
 const ORIGIN = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
 
 export async function POST(request: Request) {
   try {
-    const { courseId, email, priceInCents } = await request.json()
+    const { courseId, email, priceInCents, couponCode } = await request.json()
 
     if (!courseId || !email || !priceInCents) {
       return Response.json(
@@ -31,6 +32,28 @@ export async function POST(request: Request) {
       )
     }
 
+    // Validate and apply coupon server-side
+    let finalPriceCents = priceInCents
+    let appliedCoupon: { code: string; percent_off: number } | null = null
+    if (couponCode) {
+      const code = String(couponCode).trim().toUpperCase()
+      const rows = await sql`
+        SELECT code, percent_off, expires_at, max_redemptions, times_redeemed
+        FROM coupons
+        WHERE code = ${code} AND active = true
+      `
+      const coupon = rows[0]
+      const isExpired = coupon?.expires_at && new Date(coupon.expires_at) < new Date()
+      const isExhausted = coupon?.max_redemptions && coupon.times_redeemed >= coupon.max_redemptions
+      if (!coupon || isExpired || isExhausted) {
+        return Response.json({ error: 'Invalid or expired coupon code' }, { status: 400 })
+      }
+      appliedCoupon = { code: coupon.code, percent_off: coupon.percent_off }
+      finalPriceCents = Math.max(50, Math.round(priceInCents * (1 - coupon.percent_off / 100)))
+    }
+
+    const stripe = getStripe()
+
     // Create Stripe Checkout Session
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ['card'],
@@ -42,10 +65,12 @@ export async function POST(request: Request) {
             currency: 'usd',
             product_data: {
               name: product.name,
-              description: product.description,
+              description: appliedCoupon
+                ? `${product.description || ''} (Coupon ${appliedCoupon.code}: ${appliedCoupon.percent_off}% off)`.trim()
+                : product.description,
               images: product.image ? [product.image] : [],
             },
-            unit_amount: priceInCents,
+            unit_amount: finalPriceCents,
           },
           quantity: 1,
         },
@@ -55,6 +80,7 @@ export async function POST(request: Request) {
       metadata: {
         courseId: courseId.toString(),
         email,
+        ...(appliedCoupon ? { couponCode: appliedCoupon.code } : {}),
       },
     })
 

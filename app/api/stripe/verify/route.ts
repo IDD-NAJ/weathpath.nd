@@ -1,5 +1,5 @@
 import { NextResponse, type NextRequest } from "next/server"
-import { stripe } from "@/lib/stripe"
+import { getStripe } from "@/lib/stripe"
 import { sql } from "@/lib/db"
 import { createPurchase } from "@/lib/purchase-service"
 
@@ -16,7 +16,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Missing sessionId" }, { status: 400 })
     }
 
-    const session = await stripe.checkout.sessions.retrieve(sessionId)
+    const session = await getStripe().checkout.sessions.retrieve(sessionId)
 
     if (session.payment_status !== "paid") {
       return NextResponse.json({ confirmed: false, status: session.payment_status })
@@ -70,6 +70,17 @@ export async function POST(request: NextRequest) {
     const order = orderRows[0]
 
     await createPurchase(courseId, email, String(order.id), amountCents)
+
+    // Record coupon redemption if one was used
+    if (session.metadata?.couponCode) {
+      try {
+        await sql`
+          UPDATE coupons SET times_redeemed = times_redeemed + 1 WHERE code = ${session.metadata.couponCode}
+        `
+      } catch (couponError) {
+        console.error("[v0] Failed to record coupon redemption:", couponError)
+      }
+    }
 
     console.log("[v0] Order auto-confirmed:", { orderId: order.id, courseId, email })
 

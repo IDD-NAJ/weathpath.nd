@@ -14,6 +14,9 @@ import {
   ShieldCheck,
   Bell,
   Wand2,
+  Ticket,
+  MessageSquare,
+  BarChart3,
 } from "lucide-react"
 import {
   Sidebar,
@@ -37,12 +40,16 @@ const mainNav = [
 ]
 
 const contentNav = [
+  { title: "Courses", href: "/admin/courses", icon: BookOpen },
   { title: "Learning Paths", href: "/admin/learning-paths", icon: BookOpen },
   { title: "Articles", href: "/admin/articles", icon: FileText },
   { title: "Success Stories", href: "/admin/stories", icon: Star },
+  { title: "Reviews", href: "/admin/reviews", icon: MessageSquare },
 ]
 
 const systemNav = [
+  { title: "Analytics", href: "/admin/analytics", icon: BarChart3 },
+  { title: "Coupons", href: "/admin/coupons", icon: Ticket },
   { title: "AI Content", href: "/admin/ai", icon: Wand2 },
   { title: "Settings", href: "/admin/settings", icon: Settings },
 ]

@@ -1,4 +1,4 @@
-import { stripe } from '@/lib/stripe'
+import { getStripe } from '@/lib/stripe'
 import { neon } from '@neondatabase/serverless'
 import { createPurchase } from '@/lib/purchase-service'
 
@@ -16,7 +16,7 @@ export async function POST(request: Request) {
   let event
 
   try {
-    event = stripe.webhooks.constructEvent(body, signature, webhookSecret)
+    event = getStripe().webhooks.constructEvent(body, signature, webhookSecret)
   } catch (error: any) {
     console.error('[v0] Webhook verification error:', error.message)
     return Response.json(
@@ -84,6 +84,18 @@ export async function POST(request: Request) {
 
       // Create user_purchase record for access tracking
       await createPurchase(courseId, email, orderId.toString(), amountCents)
+
+      // Record coupon redemption if one was used
+      if (session.metadata?.couponCode) {
+        try {
+          await sql(
+            `UPDATE coupons SET times_redeemed = times_redeemed + 1 WHERE code = $1`,
+            [session.metadata.couponCode]
+          )
+        } catch (couponError) {
+          console.error('[v0] Failed to record coupon redemption:', couponError)
+        }
+      }
 
       console.log('[v0] Purchase recorded:', {
         orderId,

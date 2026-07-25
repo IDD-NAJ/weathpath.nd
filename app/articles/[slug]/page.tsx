@@ -10,6 +10,8 @@ import Link from "next/link"
 import { notFound } from "next/navigation"
 import type { Metadata } from "next"
 import { SaveButton } from "@/components/save-button"
+import { ViewTracker } from "@/components/view-tracker"
+import { ReviewsSection } from "@/components/reviews-section"
 
 export const dynamic = 'force-dynamic'
 
@@ -60,7 +62,7 @@ export default async function ArticleDetailPage({ params }: Props) {
   const related = await sql`
     SELECT id, title, slug, excerpt, category FROM articles
     WHERE slug != ${slug} AND is_published = true AND status = 'approved'
-    ORDER BY created_at DESC
+    ORDER BY (category = ${article.category}) DESC, created_at DESC
     LIMIT 3
   `
 
@@ -126,6 +128,7 @@ export default async function ArticleDetailPage({ params }: Props) {
                   {createdAt}
                 </span>
               )}
+              <ViewTracker contentType="article" contentId={String(article.id)} />
             </div>
           </AnimatedSection>
 
@@ -183,6 +186,11 @@ export default async function ArticleDetailPage({ params }: Props) {
                 </div>
               </CardContent>
             </Card>
+          </AnimatedSection>
+
+          {/* Reviews */}
+          <AnimatedSection delay={250} className="mt-12">
+            <ReviewsSection contentType="article" contentId={String(article.id)} title="Reader Reviews" />
           </AnimatedSection>
 
           {/* CTA */}

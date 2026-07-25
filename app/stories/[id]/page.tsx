@@ -9,6 +9,8 @@ import { ArrowLeft, Quote, TrendingUp, CalendarDays, Target } from "lucide-react
 import Link from "next/link"
 import { notFound } from "next/navigation"
 import type { Metadata } from "next"
+import { ViewTracker } from "@/components/view-tracker"
+import { ReviewsSection } from "@/components/reviews-section"
 
 export const dynamic = 'force-dynamic'
 
@@ -115,6 +117,7 @@ export default async function StoryDetailPage({ params }: Props) {
                   {createdAt}
                 </Badge>
               )}
+              <ViewTracker contentType="story" contentId={String(story.id)} className="ml-1" />
             </div>
           </AnimatedSection>
 
@@ -131,6 +134,11 @@ export default async function StoryDetailPage({ params }: Props) {
                 </p>
               </CardContent>
             </Card>
+          </AnimatedSection>
+
+          {/* Reviews */}
+          <AnimatedSection delay={250} className="mt-12">
+            <ReviewsSection contentType="story" contentId={String(story.id)} title="Reader Reviews" />
           </AnimatedSection>
 
           {/* Call to action */}
