@@ -1,49 +1,32 @@
 import { Navigation } from "@/components/navigation"
 import { Footer } from "@/components/footer"
-import { Card, CardContent } from "@/components/ui/card"
 import { ChevronDown } from "lucide-react"
+import { neon } from "@neondatabase/serverless"
 
 export const metadata = {
   title: "FAQ — WealthPath",
   description: "Frequently asked questions about WealthPath courses and services.",
 }
 
-const faqs = [
-  {
-    question: "How do I get started with WealthPath?",
-    answer: "Simply sign up for a free account and browse our courses. You can start with any beginner course to get familiar with passive income concepts."
-  },
-  {
-    question: "Do you offer a money-back guarantee?",
-    answer: "Yes! We offer a 7-day money-back guarantee on all courses. If you're not satisfied, we'll refund your purchase within 7 days."
-  },
-  {
-    question: "Can I access courses offline?",
-    answer: "Our courses are delivered via email and web. You can download materials and access them offline through your device."
-  },
-  {
-    question: "How long do I have access to the courses?",
-    answer: "Once purchased, you have lifetime access to all course materials. You can revisit content anytime."
-  },
-  {
-    question: "Are there certificates upon completion?",
-    answer: "Yes! Upon completing 100% of a course, you'll receive a certificate of completion that you can display on your profile or resume."
-  },
-  {
-    question: "What if I need technical support?",
-    answer: "Our support team is available via email at support@wealthpath.com. We typically respond within 24 hours."
-  },
-  {
-    question: "Can I share my course access?",
-    answer: "Courses are for personal use only. Sharing access violates our terms of service. Consider purchasing additional accounts for team members."
-  },
-  {
-    question: "Do you offer group discounts?",
-    answer: "Yes! For orders of 10 or more courses, contact our sales team at sales@wealthpath.com for special pricing."
-  },
-]
+export const dynamic = 'force-dynamic'
 
-export default function FAQPage() {
+async function getFAQs() {
+  try {
+    const sql = neon(process.env.DATABASE_URL!)
+    const faqs = await sql(
+      `SELECT id, question, answer, category FROM faqs 
+       WHERE is_active = true 
+       ORDER BY order_index ASC, category ASC`
+    )
+    return faqs || []
+  } catch (error) {
+    console.error("[v0] Failed to fetch FAQs:", error)
+    return []
+  }
+}
+
+export default async function FAQPage() {
+  const faqs = await getFAQs()
   return (
     <div className="min-h-screen bg-background flex flex-col">
       <Navigation user={null} />
@@ -56,17 +39,28 @@ export default function FAQPage() {
           </div>
 
           <div className="space-y-4">
-            {faqs.map((faq, index) => (
-              <details key={index} className="group">
-                <summary className="flex cursor-pointer items-center justify-between rounded-lg border border-border bg-card p-4 hover:bg-muted/50 transition-colors">
-                  <h3 className="font-semibold text-foreground">{faq.question}</h3>
-                  <ChevronDown className="h-5 w-5 text-muted-foreground transition-transform group-open:rotate-180" />
-                </summary>
-                <div className="overflow-hidden border border-t-0 border-border rounded-b-lg bg-muted/30 px-4 py-3">
-                  <p className="text-muted-foreground">{faq.answer}</p>
-                </div>
-              </details>
-            ))}
+            {faqs && faqs.length > 0 ? (
+              faqs.map((faq: any) => (
+                <details key={faq.id} className="group">
+                  <summary className="flex cursor-pointer items-center justify-between rounded-lg border border-border bg-card p-4 hover:bg-muted/50 transition-colors">
+                    <div className="flex-1">
+                      <h3 className="font-semibold text-foreground text-left">{faq.question}</h3>
+                      {faq.category && (
+                        <p className="text-xs text-muted-foreground mt-1">{faq.category}</p>
+                      )}
+                    </div>
+                    <ChevronDown className="h-5 w-5 text-muted-foreground transition-transform group-open:rotate-180 ml-4 flex-shrink-0" />
+                  </summary>
+                  <div className="overflow-hidden border border-t-0 border-border rounded-b-lg bg-muted/30 px-4 py-3">
+                    <p className="text-muted-foreground">{faq.answer}</p>
+                  </div>
+                </details>
+              ))
+            ) : (
+              <div className="text-center py-8">
+                <p className="text-muted-foreground">No FAQs available. Check back soon!</p>
+              </div>
+            )}
           </div>
 
           <div className="mt-12 rounded-lg border border-border bg-card p-8 text-center">
