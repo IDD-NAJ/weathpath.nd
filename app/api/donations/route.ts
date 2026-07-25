@@ -1,5 +1,5 @@
 import { NextResponse, type NextRequest } from "next/server"
-import { stripe } from "@/lib/stripe"
+import { getStripe } from "@/lib/stripe"
 import { sql } from "@/lib/db"
 import { getCurrentUser } from "@/lib/auth"
 
@@ -8,6 +8,7 @@ const ORIGIN = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"
 // POST — create a Stripe Checkout session for a card donation
 export async function POST(request: NextRequest) {
   try {
+    const stripeClient = getStripe()
     const { amountCents, donorName, donorEmail, message } = await request.json()
 
     const amount = Number(amountCents)
@@ -18,7 +19,7 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const session = await stripe.checkout.sessions.create({
+    const session = await stripeClient.checkout.sessions.create({
       payment_method_types: ["card"],
       mode: "payment",
       customer_email: donorEmail || undefined,

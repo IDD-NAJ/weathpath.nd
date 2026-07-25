@@ -471,6 +471,8 @@ export default function AdminOverviewPage() {
                 { label: "Manage Users", href: "/admin/users", icon: Users },
                 { label: "Send Notifications", href: "/admin/notifications", icon: Bell },
                 { label: "AI Content Generator", href: "/admin/ai", icon: Wand2 },
+                { label: "Banners & Announcements", href: "/admin/banners", icon: Bell },
+                { label: "Create Content", href: "/admin/content", icon: FileEdit },
                 { label: "Site Settings", href: "/admin/settings", icon: Award },
               ].map((action, index) => (
                 <motion.div

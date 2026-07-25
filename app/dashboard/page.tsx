@@ -15,6 +15,8 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { Progress } from "@/components/ui/progress"
 import Link from "next/link"
 import { MyCoursesSection } from "@/components/my-courses-section"
+import { SavedItemsSection } from "@/components/dashboard/saved-items-section"
+import { PurchasedCoursesSection } from "@/components/dashboard/purchased-courses-section"
 
 interface UserData {
   progress: Array<any>
@@ -513,6 +515,12 @@ export default function DashboardPage() {
           ))}
         </div>
       </div>
+
+      {/* Purchased Courses Section */}
+      <PurchasedCoursesSection />
+
+      {/* Saved Items Section */}
+      <SavedItemsSection />
 
       {/* Topic explorer */}
       <Card>

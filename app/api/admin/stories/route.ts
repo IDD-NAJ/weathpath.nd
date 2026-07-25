@@ -44,20 +44,24 @@ export async function POST(request: NextRequest) {
     const user = await requireAdmin()
     const body = await request.json()
     
-    const { name, title, quote, income, strategy, slug } = body
+    const { name, title, quote, income, strategy, slug, description, content, author_name, status } = body
     
-    if (!name || !title || !quote) {
-      return NextResponse.json({ error: 'Name, title, and quote are required' }, { status: 400 })
+    // Support both old format (name, quote) and new format (title, description, content)
+    const finalTitle = title || name
+    const finalContent = content || quote
+    
+    if (!finalTitle || !finalContent) {
+      return NextResponse.json({ error: 'Title and content are required' }, { status: 400 })
     }
     
-    const generatedSlug = slug || name.toLowerCase().replace(/[^a-z0-9]+/g, '-')
+    const generatedSlug = slug || name?.toLowerCase().replace(/[^a-z0-9]+/g, '-') || title?.toLowerCase().replace(/[^a-z0-9]+/g, '-')
     
     const result = await sql`
       INSERT INTO success_stories (
-        name, title, quote, income, strategy, slug, author_id, status, is_published
+        name, title, content, description, income, strategy, slug, author_name, status, created_at
       ) VALUES (
-        ${name}, ${title}, ${quote}, ${income || ''}, ${strategy || ''}, 
-        ${generatedSlug}, ${user.id}, 'draft', false
+        ${name || author_name}, ${finalTitle}, ${finalContent}, ${description || quote || ''}, ${income || ''}, ${strategy || ''}, 
+        ${generatedSlug}, ${author_name || user.name || 'Admin'}, ${status || 'draft'}, NOW()
       )
       RETURNING *
     `

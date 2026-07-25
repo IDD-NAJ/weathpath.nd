@@ -44,20 +44,20 @@ export async function POST(request: NextRequest) {
     const user = await requireAdmin()
     const body = await request.json()
     
-    const { title, description, difficulty, duration, slug } = body
+    const { title, description, content, difficulty, duration, slug, author_name, status } = body
     
-    if (!title) {
-      return NextResponse.json({ error: 'Title is required' }, { status: 400 })
+    if (!title || !content) {
+      return NextResponse.json({ error: 'Title and content are required' }, { status: 400 })
     }
     
     const generatedSlug = slug || title.toLowerCase().replace(/[^a-z0-9]+/g, '-')
     
     const result = await sql`
       INSERT INTO learning_paths (
-        title, slug, description, difficulty, duration, author_id, status, is_published
+        title, slug, description, content, difficulty, duration, author_name, status, created_at
       ) VALUES (
-        ${title}, ${generatedSlug}, ${description || ''}, ${difficulty || 'beginner'}, 
-        ${duration || '30 mins'}, ${user.id}, 'draft', false
+        ${title}, ${generatedSlug}, ${description || ''}, ${content || ''}, ${difficulty || 'beginner'}, 
+        ${duration || '30 mins'}, ${author_name || user.name || 'Admin'}, ${status || 'draft'}, NOW()
       )
       RETURNING *
     `

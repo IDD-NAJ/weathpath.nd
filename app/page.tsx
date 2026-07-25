@@ -13,6 +13,7 @@ import { CommunityFeed } from "@/components/community-feed"
 import { ResourcesSection } from "@/components/resources-section"
 import { StepGuide } from "@/components/step-guide"
 import { DonateSectionWrapper } from "@/components/donate-section-wrapper"
+import { HomeBanners } from "@/components/home-banners"
 import { CtaFooter } from "@/components/cta-footer"
 
 export const dynamic = 'force-dynamic'
@@ -23,6 +24,9 @@ export default async function Page() {
   return (
     <div className="min-h-screen bg-background">
       <Navigation user={user} />
+      <div className="px-6 pt-4">
+        <HomeBanners />
+      </div>
       <main>
         <HeroSection />
         <FeaturesSection />
