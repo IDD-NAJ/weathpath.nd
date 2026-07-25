@@ -9,6 +9,7 @@ import { ArrowLeft, CalendarDays, User, TrendingUp } from "lucide-react"
 import Link from "next/link"
 import { notFound } from "next/navigation"
 import type { Metadata } from "next"
+import { SaveButton } from "@/components/save-button"
 
 export const dynamic = 'force-dynamic'
 
@@ -94,6 +95,24 @@ export default async function ArticleDetailPage({ params }: Props) {
                 {article.excerpt}
               </p>
             )}
+            <div className="mt-4 flex items-center gap-2">
+              <SaveButton
+                itemType="article"
+                itemId={article.id}
+                itemTitle={article.title}
+                itemSlug={article.slug}
+                listType="favorite"
+                showLabel
+              />
+              <SaveButton
+                itemType="article"
+                itemId={article.id}
+                itemTitle={article.title}
+                itemSlug={article.slug}
+                listType="wishlist"
+                showLabel
+              />
+            </div>
             <div className="mt-6 flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
               {article.author_name && (
                 <span className="flex items-center gap-1.5">

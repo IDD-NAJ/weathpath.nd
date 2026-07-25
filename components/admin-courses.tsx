@@ -1,8 +1,9 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { Plus, Edit2, Trash2, Eye, EyeOff } from "lucide-react"
+import { Plus, Edit2, Trash2, Eye, EyeOff, FileText } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import { CourseDocumentsManager } from "@/components/admin/course-documents-manager"
 
 interface Course {
   id: number
@@ -22,6 +23,7 @@ export function AdminCourses() {
   const [loading, setLoading] = useState(true)
   const [showForm, setShowForm] = useState(false)
   const [editingId, setEditingId] = useState<number | null>(null)
+  const [docsCourse, setDocsCourse] = useState<Course | null>(null)
   const [formData, setFormData] = useState({
     title: "",
     slug: "",
@@ -321,6 +323,15 @@ export function AdminCourses() {
                       <Edit2 className="h-3 w-3" />
                     </Button>
                     <Button
+                      onClick={() => setDocsCourse(course)}
+                      variant="outline"
+                      size="sm"
+                      className="rounded-sm"
+                      title="Manage documents"
+                    >
+                      <FileText className="h-3 w-3" />
+                    </Button>
+                    <Button
                       onClick={() => handleDelete(course.id)}
                       variant="outline"
                       size="sm"
@@ -334,6 +345,15 @@ export function AdminCourses() {
             </tbody>
           </table>
         </div>
+      )}
+
+      {docsCourse && (
+        <CourseDocumentsManager
+          courseId={docsCourse.id}
+          courseTitle={docsCourse.title}
+          open={Boolean(docsCourse)}
+          onClose={() => setDocsCourse(null)}
+        />
       )}
     </div>
   )

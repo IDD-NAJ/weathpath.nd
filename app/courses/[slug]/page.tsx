@@ -4,6 +4,7 @@ import { ArrowLeft, CheckCircle2, ShoppingCart, Users, Star, Clock, Play } from 
 import { Button } from "@/components/ui/button"
 import { SimpleLayoutWrapper } from "@/components/layout-wrapper"
 import { CourseCheckout } from "@/components/course-checkout"
+import { SaveButton } from "@/components/save-button"
 import { CourseModules } from "@/components/course-modules"
 import { neon } from "@neondatabase/serverless"
 import { verifyPurchaseAccess } from "@/lib/purchase-service"
@@ -128,6 +129,24 @@ export default async function CourseDetailPage({
                 <p className="font-serif text-3xl font-bold text-primary">
                   ${(course.price_cents / 100).toFixed(2)}
                 </p>
+                <div className="flex items-center gap-2">
+                  <SaveButton
+                    itemType="course"
+                    itemId={course.id}
+                    itemTitle={course.title}
+                    itemSlug={course.slug}
+                    listType="favorite"
+                    showLabel
+                  />
+                  <SaveButton
+                    itemType="course"
+                    itemId={course.id}
+                    itemTitle={course.title}
+                    itemSlug={course.slug}
+                    listType="wishlist"
+                    showLabel
+                  />
+                </div>
 
                 {/* Quick Stats */}
                 <div className="grid grid-cols-3 gap-4">

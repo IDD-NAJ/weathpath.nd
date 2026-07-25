@@ -30,6 +30,17 @@ export async function POST(request: Request) {
     if (event.type === 'checkout.session.completed') {
       const session = event.data.object as any
 
+      // Donation sessions are completed separately
+      if (session.metadata?.type === 'donation') {
+        const donationSql = neon(process.env.DATABASE_URL!)
+        await donationSql(
+          `UPDATE donations SET status = 'completed', completed_at = NOW() WHERE stripe_session_id = $1 AND status != 'completed'`,
+          [session.id]
+        )
+        console.log('[v0] Donation completed via webhook:', session.id)
+        return Response.json({ received: true })
+      }
+
       const courseId = parseInt(session.metadata.courseId)
       const email = session.customer_email || session.metadata.email
       const amountCents = session.amount_total
@@ -41,10 +52,21 @@ export async function POST(request: Request) {
 
       const sql = neon(process.env.DATABASE_URL!)
 
+      // Idempotency: skip if this session was already recorded (e.g. by the
+      // success-page auto-confirm flow)
+      const existing = await sql(
+        `SELECT id FROM orders WHERE stripe_session_id = $1 OR reference = $1 LIMIT 1`,
+        [session.id]
+      )
+      if (existing.length > 0) {
+        console.log('[v0] Order already recorded for session:', session.id)
+        return Response.json({ received: true, alreadyRecorded: true })
+      }
+
       // Create order record
       const orderResult = await sql(
-        `INSERT INTO orders (reference, course_id, email, buyer_name, amount_cents, status, delivery_status, created_at, paid_at)
-         VALUES ($1, $2, $3, $4, $5, $6, $7, NOW(), NOW())
+        `INSERT INTO orders (reference, course_id, email, buyer_name, amount_cents, status, delivery_status, stripe_session_id, created_at, paid_at)
+         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, NOW(), NOW())
          RETURNING id`,
         [
           session.id, // Use Stripe session ID as order reference
@@ -54,6 +76,7 @@ export async function POST(request: Request) {
           amountCents,
           'completed',
           'ready',
+          session.id,
         ]
       )
 

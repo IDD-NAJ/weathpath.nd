@@ -1,21 +1,29 @@
 "use client"
 
-import { useEffect, useState } from "react"
-import { useSearchParams } from "next/navigation"
+import { useEffect, useState, useRef } from "react"
+import { useSearchParams, useParams } from "next/navigation"
 import Link from "next/link"
-import { Download, Mail, CheckCircle2, Home, Play } from "lucide-react"
+import { Download, Mail, CheckCircle2, Home, Play, FileText, Loader2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { SimpleLayoutWrapper } from "@/components/layout-wrapper"
-import { useParams } from "next/navigation"
 
 interface Order {
   id: string
+  reference?: string
   email: string
-  name: string
-  course_title: string
+  buyer_name?: string
+  name?: string
+  course_title?: string
   course_slug?: string
   status: string
   created_at: string
+}
+
+interface CourseDocument {
+  id: string
+  file_name: string
+  file_type: string
+  file_size: number
 }
 
 export default function SuccessPage() {
@@ -26,36 +34,103 @@ export default function SuccessPage() {
   const email = searchParams.get("email")
   const courseSlug = params.slug
   const [order, setOrder] = useState<Order | null>(null)
+  const [documents, setDocuments] = useState<CourseDocument[]>([])
+  const [courseId, setCourseId] = useState<number | null>(null)
   const [loading, setLoading] = useState(true)
+  const [confirming, setConfirming] = useState(false)
+  const verified = useRef(false)
 
   useEffect(() => {
-    // For Stripe sessions, we create a minimal order object
-    if (sessionId && email) {
-      setOrder({
-        id: sessionId,
-        email,
-        name: 'Valued Customer',
-        course_title: '',
-        course_slug: courseSlug,
-        status: 'completed',
-        created_at: new Date().toISOString(),
-      })
-      setLoading(false)
-    } else if (orderId) {
-      fetch(`/api/orders?id=${orderId}`)
-        .then((res) => res.json())
-        .then((data) => {
+    async function confirmAndLoad() {
+      if (sessionId && !verified.current) {
+        verified.current = true
+        setConfirming(true)
+        try {
+          // Auto-confirm the order by verifying payment with Stripe
+          const res = await fetch("/api/stripe/verify", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ sessionId }),
+          })
+          const data = await res.json()
+
+          if (data.confirmed && data.order) {
+            setOrder({ ...data.order, course_slug: courseSlug })
+          } else if (email) {
+            setOrder({
+              id: sessionId,
+              email,
+              status: data.confirmed ? "completed" : "processing",
+              created_at: new Date().toISOString(),
+              course_slug: courseSlug,
+            })
+          }
+        } catch (error) {
+          console.error("[v0] Order confirmation failed:", error)
+          if (email) {
+            setOrder({
+              id: sessionId,
+              email,
+              status: "completed",
+              created_at: new Date().toISOString(),
+              course_slug: courseSlug,
+            })
+          }
+        } finally {
+          setConfirming(false)
+          setLoading(false)
+        }
+      } else if (orderId && !verified.current) {
+        verified.current = true
+        try {
+          const res = await fetch(`/api/orders?id=${orderId}`)
+          const data = await res.json()
           setOrder({ ...data.order, course_slug: courseSlug })
+        } catch (error) {
+          console.error("[v0] Failed to fetch order:", error)
+        } finally {
           setLoading(false)
-        })
-        .catch((err) => {
-          console.error("[v0] Failed to fetch order:", err)
-          setLoading(false)
-        })
-    } else {
-      setLoading(false)
+        }
+      } else if (!sessionId && !orderId) {
+        setLoading(false)
+      }
     }
+    confirmAndLoad()
   }, [orderId, sessionId, email, courseSlug])
+
+  // Load the course id, then any downloadable documents for it
+  useEffect(() => {
+    async function loadDocuments() {
+      const buyerEmail = order?.email || email
+      if (!buyerEmail || !courseSlug) return
+      try {
+        const coursesRes = await fetch("/api/courses")
+        const coursesData = await coursesRes.json()
+        const course = (coursesData.courses || []).find((c: any) => c.slug === courseSlug)
+        if (!course) return
+        setCourseId(course.id)
+
+        const docsRes = await fetch(
+          `/api/courses/documents?courseId=${course.id}&email=${encodeURIComponent(buyerEmail)}`
+        )
+        if (docsRes.ok) {
+          const docsData = await docsRes.json()
+          setDocuments(docsData.documents || [])
+        }
+      } catch (error) {
+        console.error("[v0] Failed to load documents:", error)
+      }
+    }
+    if (order) loadDocuments()
+  }, [order, email, courseSlug])
+
+  const buyerEmail = order?.email || email || ""
+
+  function formatSize(bytes: number) {
+    if (!bytes) return ""
+    if (bytes < 1024 * 1024) return `${Math.round(bytes / 1024)} KB`
+    return `${(bytes / (1024 * 1024)).toFixed(1)} MB`
+  }
 
   return (
     <SimpleLayoutWrapper>
@@ -64,18 +139,24 @@ export default function SuccessPage() {
           <div className="text-center space-y-8 animate-fade-up">
             {/* Success Icon */}
             <div className="flex justify-center">
-              <div className="rounded-full bg-green-500/20 p-4">
-                <CheckCircle2 className="h-12 w-12 text-green-600" />
+              <div className="rounded-full bg-primary/15 p-4">
+                {confirming ? (
+                  <Loader2 className="h-12 w-12 text-primary animate-spin" />
+                ) : (
+                  <CheckCircle2 className="h-12 w-12 text-primary" />
+                )}
               </div>
             </div>
 
             {/* Heading */}
             <div className="space-y-3">
-              <h1 className="font-serif text-5xl font-bold text-foreground">
-                Order Confirmed!
+              <h1 className="font-serif text-5xl font-bold text-foreground text-balance">
+                {confirming ? "Confirming Your Order..." : "Order Confirmed!"}
               </h1>
               <p className="text-xl text-muted-foreground">
-                Thank you for your purchase. Your course is on the way.
+                {confirming
+                  ? "Verifying your payment with Stripe."
+                  : "Thank you for your purchase. Your course access is ready."}
               </p>
             </div>
 
@@ -83,66 +164,77 @@ export default function SuccessPage() {
             {!loading && order && (
               <div className="rounded-sm border border-border bg-card p-8 text-left space-y-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  {/* Order ID */}
                   <div>
-                    <p className="text-sm text-muted-foreground mb-1">
-                      Order Number
-                    </p>
-                    <p className="font-mono font-bold text-foreground break-all">
-                      {order.id}
+                    <p className="text-sm text-muted-foreground mb-1">Order Number</p>
+                    <p className="font-mono font-bold text-foreground break-all text-sm">
+                      {order.reference || order.id}
                     </p>
                   </div>
-
-                  {/* Email */}
                   <div>
-                    <p className="text-sm text-muted-foreground mb-1">
-                      Delivery Email
-                    </p>
+                    <p className="text-sm text-muted-foreground mb-1">Delivery Email</p>
+                    <p className="font-semibold text-foreground">{order.email}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-muted-foreground mb-1">Buyer</p>
                     <p className="font-semibold text-foreground">
-                      {order.email}
+                      {order.buyer_name || order.name || "Valued Customer"}
                     </p>
                   </div>
-
-                  {/* Course */}
                   <div>
-                    <p className="text-sm text-muted-foreground mb-1">
-                      Course
-                    </p>
-                    <p className="font-semibold text-foreground">
-                      {order.course_title}
-                    </p>
-                  </div>
-
-                  {/* Status */}
-                  <div>
-                    <p className="text-sm text-muted-foreground mb-1">
-                      Status
-                    </p>
+                    <p className="text-sm text-muted-foreground mb-1">Status</p>
                     <div className="flex items-center gap-2">
-                      <span className="h-2 w-2 rounded-full bg-green-500" />
-                      <span className="font-semibold text-foreground capitalize">
-                        {order.status}
-                      </span>
+                      <span className="h-2 w-2 rounded-full bg-primary" />
+                      <span className="font-semibold text-foreground capitalize">{order.status}</span>
                     </div>
                   </div>
                 </div>
               </div>
             )}
 
+            {/* Course Documents */}
+            {documents.length > 0 && courseId && (
+              <div className="rounded-sm border border-primary/30 bg-primary/5 p-6 text-left space-y-4">
+                <h3 className="font-serif text-lg font-bold text-foreground flex items-center gap-2">
+                  <FileText className="h-5 w-5 text-primary" />
+                  Your Course Materials
+                </h3>
+                <div className="flex flex-col gap-2">
+                  {documents.map((doc) => (
+                    <a
+                      key={doc.id}
+                      href={`/api/courses/documents?courseId=${courseId}&documentId=${doc.id}&email=${encodeURIComponent(buyerEmail)}`}
+                      className="flex items-center justify-between rounded-sm border border-border bg-card p-3 hover:border-primary/50 transition-colors"
+                    >
+                      <div className="flex items-center gap-3 min-w-0">
+                        <FileText className="h-4 w-4 text-primary shrink-0" />
+                        <span className="text-sm font-medium text-foreground truncate">
+                          {doc.file_name}
+                        </span>
+                        {doc.file_size > 0 && (
+                          <span className="text-xs text-muted-foreground shrink-0">
+                            {formatSize(doc.file_size)}
+                          </span>
+                        )}
+                      </div>
+                      <Download className="h-4 w-4 text-muted-foreground shrink-0" />
+                    </a>
+                  ))}
+                </div>
+              </div>
+            )}
+
             {/* Next Steps */}
-            <div className="rounded-sm border border-primary/30 bg-primary/5 p-6 text-left space-y-4">
-              <h3 className="font-serif text-lg font-bold text-foreground">
-                Next Steps
-              </h3>
+            <div className="rounded-sm border border-border bg-card p-6 text-left space-y-4">
+              <h3 className="font-serif text-lg font-bold text-foreground">Next Steps</h3>
               <ol className="space-y-3 list-decimal list-inside">
                 <li className="text-muted-foreground">
-                  Check your email (and spam folder) for your course access
+                  Download your course materials above, or start learning online
                 </li>
                 <li className="text-muted-foreground">
-                  Click the download link to access all course materials
+                  Access your purchases anytime from your dashboard
                 </li>
                 <li className="text-muted-foreground">
-                  Start learning at your own pace with lifetime access
+                  Learn at your own pace with lifetime access
                 </li>
               </ol>
             </div>
@@ -152,11 +244,9 @@ export default function SuccessPage() {
               <div className="flex items-start gap-3">
                 <Mail className="h-5 w-5 text-primary shrink-0 mt-0.5" />
                 <div className="text-left">
-                  <p className="font-semibold text-foreground">
-                    Email Not Received?
-                  </p>
+                  <p className="font-semibold text-foreground">Need Help?</p>
                   <p className="text-sm text-muted-foreground">
-                    Check your spam folder or contact support at support@wealthpath.com
+                    Contact support at support@wealthpath.com with your order number
                   </p>
                 </div>
               </div>
@@ -165,7 +255,7 @@ export default function SuccessPage() {
             {/* Actions */}
             <div className="flex flex-col sm:flex-row gap-3 justify-center">
               {order && (
-                <Button asChild className="gap-2 rounded-sm bg-green-600 hover:bg-green-700">
+                <Button asChild className="gap-2 rounded-sm">
                   <Link href={`/courses/${order.course_slug}/learn?email=${encodeURIComponent(order.email)}`}>
                     <Play className="h-5 w-5" />
                     Start Learning Now
@@ -178,7 +268,7 @@ export default function SuccessPage() {
                   Browse More Courses
                 </Link>
               </Button>
-              <Button asChild className="gap-2 rounded-sm">
+              <Button asChild variant="outline" className="gap-2 rounded-sm">
                 <Link href="/">
                   <Home className="h-5 w-5" />
                   Back to Home
