@@ -6,7 +6,7 @@ import {
   BookOpen, Calculator, HelpCircle, ArrowRight, Star, FileText,
   Award, Target, Bell, Bookmark, TrendingUp, Trophy, Zap, Lock,
   Plane, Code2, Bitcoin, ShoppingBag, BarChart3, ChevronRight,
-  Sparkles, Circle,
+  Sparkles, Circle, MessageSquare,
 } from "lucide-react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
@@ -295,6 +295,41 @@ export default function DashboardPage() {
       {/* My Courses Section */}
       <MyCoursesSection />
 
+      {/* Certificates Section */}
+      <Card>
+        <CardHeader className="pb-3">
+          <CardTitle className="flex items-center gap-2 text-sm font-semibold">
+            <Award className="h-4 w-4 text-primary" />
+            Certificates
+          </CardTitle>
+          <CardDescription className="text-xs">Your earned certificates</CardDescription>
+        </CardHeader>
+        <CardContent>
+          {userData.certificates && userData.certificates.length > 0 ? (
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+              {userData.certificates.slice(0, 4).map((cert: any) => (
+                <div key={cert.id} className="rounded-lg border border-border p-3 hover:shadow-md transition-shadow">
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      <h3 className="text-xs font-semibold text-foreground truncate">{cert.courseName}</h3>
+                      <Award className="h-3.5 w-3.5 text-primary" />
+                    </div>
+                    <p className="text-xs text-muted-foreground">
+                      {cert.earnedAt ? new Date(cert.earnedAt).toLocaleDateString() : "Recently earned"}
+                    </p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="flex flex-col items-center gap-3 py-8 text-center">
+              <Award className="h-8 w-8 text-muted-foreground/50" />
+              <p className="text-xs text-muted-foreground">Complete courses to earn certificates</p>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
       {/* Main content grid */}
       <div className="grid gap-6 lg:grid-cols-3">
         {/* Progress */}
@@ -384,6 +419,43 @@ export default function DashboardPage() {
                     </Badge>
                   </div>
                 ))}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* My Reviews */}
+        <Card id="my-reviews">
+          <CardHeader className="pb-3">
+            <CardTitle className="flex items-center gap-2 text-sm font-semibold">
+              <MessageSquare className="h-4 w-4 text-primary" />
+              My Reviews
+            </CardTitle>
+            <CardDescription className="text-xs">Feedback you&apos;ve shared</CardDescription>
+          </CardHeader>
+          <CardContent>
+            {userData.myReviews && userData.myReviews.length > 0 ? (
+              <div className="flex flex-col gap-2">
+                {userData.myReviews.slice(0, 3).map((review: any) => (
+                  <div key={review.id} className="border-l-2 border-primary/50 pl-3 py-1">
+                    <p className="text-xs font-semibold text-foreground truncate">{review.contentTitle}</p>
+                    <div className="flex items-center gap-2 mt-0.5">
+                      <div className="flex">
+                        {Array.from({ length: 5 }).map((_, i) => (
+                          <span key={i} className={`text-xs ${i < review.rating ? "text-yellow-400" : "text-muted-foreground/30"}`}>
+                            ★
+                          </span>
+                        ))}
+                      </div>
+                      <Badge variant="secondary" className="text-[9px]">{review.status}</Badge>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="flex flex-col items-center gap-2 py-6 text-center">
+                <MessageSquare className="h-6 w-6 text-muted-foreground/50" />
+                <p className="text-xs text-muted-foreground">No reviews yet</p>
               </div>
             )}
           </CardContent>

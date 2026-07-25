@@ -13,7 +13,13 @@ export async function GET(request: NextRequest) {
   const pattern = `%${q}%`
 
   try {
-    const [stories, paths, articles] = await Promise.all([
+    const [courses, stories, paths, articles] = await Promise.all([
+      sql`
+        SELECT id, title, slug, category FROM courses
+        WHERE is_published = true
+          AND (title ILIKE ${pattern} OR description ILIKE ${pattern})
+        LIMIT 5
+      `,
       sql`
         SELECT id, name AS title, quote AS description
         FROM success_stories
@@ -38,6 +44,13 @@ export async function GET(request: NextRequest) {
     ])
 
     const results = [
+      ...courses.map((c: Record<string, string>) => ({
+        id: c.id,
+        type: "course" as const,
+        title: c.title,
+        description: (c.category || "").slice(0, 100),
+        href: `/courses/${c.slug}`,
+      })),
       ...stories.map((s: Record<string, string>) => ({
         id: s.id,
         type: "story" as const,

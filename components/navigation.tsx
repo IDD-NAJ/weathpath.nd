@@ -16,6 +16,7 @@ import { Badge } from "@/components/ui/badge"
 import { cn } from "@/lib/utils"
 import { logoutAction } from "@/app/actions/auth"
 import { SearchButton } from "@/components/search-overlay"
+import { GlobalSearch } from "@/components/global-search"
 import { ThemeToggle } from "@/components/theme-toggle"
 
 const topics = [
@@ -193,6 +194,7 @@ export function Navigation({ user }: NavigationProps) {
 
         {/* Mobile right */}
         <div className="flex items-center gap-1 md:hidden">
+          <GlobalSearch />
           <SearchButton />
           <ThemeToggle />
           <button
