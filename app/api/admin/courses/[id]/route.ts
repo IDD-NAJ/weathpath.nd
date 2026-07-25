@@ -31,25 +31,71 @@ export async function PUT(
 ) {
   try {
     const courseId = parseInt(params.id)
-    const { title, description, price_cents, category, level, lessons, is_visible, status } = await request.json()
+    const { title, description, price_cents, category, level, lessons, is_visible, status, slug } = await request.json()
 
     const sql = neon(process.env.DATABASE_URL!)
 
-    const result = await sql(
-      `UPDATE courses 
-       SET title = COALESCE($1, title),
-           description = COALESCE($2, description),
-           price_cents = COALESCE($3, price_cents),
-           category = COALESCE($4, category),
-           level = COALESCE($5, level),
-           lessons = COALESCE($6, lessons),
-           is_visible = COALESCE($7, is_visible),
-           status = COALESCE($8, status),
-           updated_at = CURRENT_TIMESTAMP
-       WHERE id = $9
-       RETURNING *`,
-      [title, description, price_cents, category, level, lessons, is_visible, status, courseId]
-    )
+    // Build update query dynamically based on provided fields
+    const updates: string[] = []
+    const values: any[] = []
+    let paramCount = 1
+
+    if (title !== undefined) {
+      updates.push(`title = $${paramCount}`)
+      values.push(title)
+      paramCount++
+    }
+    if (slug !== undefined) {
+      updates.push(`slug = $${paramCount}`)
+      values.push(slug)
+      paramCount++
+    }
+    if (description !== undefined) {
+      updates.push(`description = $${paramCount}`)
+      values.push(description)
+      paramCount++
+    }
+    if (price_cents !== undefined) {
+      updates.push(`price_cents = $${paramCount}`)
+      values.push(price_cents)
+      paramCount++
+    }
+    if (category !== undefined) {
+      updates.push(`category = $${paramCount}`)
+      values.push(category)
+      paramCount++
+    }
+    if (level !== undefined) {
+      updates.push(`level = $${paramCount}`)
+      values.push(level)
+      paramCount++
+    }
+    if (lessons !== undefined) {
+      updates.push(`lessons = $${paramCount}`)
+      values.push(lessons)
+      paramCount++
+    }
+    if (is_visible !== undefined) {
+      updates.push(`is_visible = $${paramCount}`)
+      values.push(is_visible)
+      paramCount++
+    }
+    if (status !== undefined) {
+      updates.push(`status = $${paramCount}`)
+      values.push(status)
+      paramCount++
+    }
+
+    if (updates.length === 0) {
+      return NextResponse.json({ error: "No fields to update" }, { status: 400 })
+    }
+
+    updates.push(`updated_at = CURRENT_TIMESTAMP`)
+    values.push(courseId)
+
+    const query = `UPDATE courses SET ${updates.join(", ")} WHERE id = $${paramCount} RETURNING *`
+
+    const result = await sql(query, values)
 
     if (result.length === 0) {
       return NextResponse.json({ error: "Course not found" }, { status: 404 })
@@ -58,7 +104,7 @@ export async function PUT(
     return NextResponse.json({ course: result[0] })
   } catch (error: any) {
     console.error("[v0] Failed to update course:", error.message)
-    return NextResponse.json({ error: "Failed to update course" }, { status: 500 })
+    return NextResponse.json({ error: `Failed to update course: ${error.message}` }, { status: 500 })
   }
 }
 

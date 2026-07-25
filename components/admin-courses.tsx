@@ -64,14 +64,28 @@ export function AdminCourses() {
         : "/api/admin/courses"
       
       const method = editingId ? "PUT" : "POST"
+
+      // Include all fields in the request
+      const payload = {
+        title: formData.title,
+        slug: formData.slug,
+        description: formData.description,
+        price_cents: formData.price_cents,
+        category: formData.category,
+        level: formData.level,
+        lessons: formData.lessons,
+      }
       
       const res = await fetch(url, {
         method,
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
+        body: JSON.stringify(payload),
       })
 
+      const data = await res.json()
+
       if (res.ok) {
+        console.log("[v0] Course saved successfully:", data)
         await fetchCourses()
         setShowForm(false)
         setEditingId(null)
@@ -86,9 +100,8 @@ export function AdminCourses() {
         })
         alert("Course saved successfully")
       } else {
-        const error = await res.json()
-        console.error("[v0] API error:", error)
-        alert(error.error || "Failed to save course")
+        console.error("[v0] API error:", data)
+        alert(data.error || "Failed to save course")
       }
     } catch (err) {
       console.error("[v0] Failed to save course:", err)
@@ -112,14 +125,20 @@ export function AdminCourses() {
 
   const handleToggleVisibility = async (course: Course) => {
     try {
-      await fetch(`/api/admin/courses/${course.id}`, {
+      const res = await fetch(`/api/admin/courses/${course.id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ is_visible: !course.is_visible }),
       })
-      await fetchCourses()
+      if (res.ok) {
+        await fetchCourses()
+      } else {
+        const error = await res.json()
+        alert(error.error || "Failed to toggle visibility")
+      }
     } catch (err) {
       console.error("[v0] Failed to toggle visibility:", err)
+      alert("Failed to toggle visibility")
     }
   }
 
