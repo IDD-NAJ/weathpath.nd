@@ -91,10 +91,11 @@ export async function PUT(
     }
 
     updates.push(`updated_at = CURRENT_TIMESTAMP`)
+    
+    // Add courseId to values array at the correct position
     values.push(courseId)
 
-    const idParamPosition = paramCount + 1
-    const query = `UPDATE courses SET ${updates.join(", ")} WHERE id = $${idParamPosition} RETURNING *`
+    const query = `UPDATE courses SET ${updates.join(", ")} WHERE id = $${paramCount} RETURNING *`
 
     const result = await sql(query, values)
 
