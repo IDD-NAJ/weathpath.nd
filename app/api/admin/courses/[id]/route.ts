@@ -93,10 +93,8 @@ export async function PUT(
     updates.push(`updated_at = CURRENT_TIMESTAMP`)
     values.push(courseId)
 
-    const query = `UPDATE courses SET ${updates.join(", ")} WHERE id = $${paramCount + 1} RETURNING *`
-
-    console.log("[v0] Update query:", query)
-    console.log("[v0] Update values:", values)
+    const idParamPosition = paramCount + 1
+    const query = `UPDATE courses SET ${updates.join(", ")} WHERE id = $${idParamPosition} RETURNING *`
 
     const result = await sql(query, values)
 
