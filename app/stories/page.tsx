@@ -1,7 +1,7 @@
 import { sql } from "@/lib/db"
 import { getCurrentUser } from "@/lib/auth"
 import { Navigation } from "@/components/navigation"
-import { CtaFooter } from "@/components/cta-footer"
+import { Footer } from "@/components/footer"
 import { AnimatedSection, AnimatedItem } from "@/components/animated-section"
 import { Badge } from "@/components/ui/badge"
 import { ArrowRight, Quote, Users } from "lucide-react"
@@ -123,7 +123,7 @@ export default async function StoriesPage() {
         </section>
       </main>
 
-      <CtaFooter />
+      <Footer />
     </div>
   )
 }

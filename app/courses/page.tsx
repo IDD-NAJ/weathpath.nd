@@ -2,6 +2,7 @@ import Link from "next/link"
 import { ShoppingCart, BookOpen, Search, Star, Eye, ChevronLeft, ChevronRight } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { SimpleLayoutWrapper } from "@/components/layout-wrapper"
+import { Footer } from "@/components/footer"
 import { neon } from "@neondatabase/serverless"
 
 export const metadata = {
@@ -378,6 +379,7 @@ export default async function CoursesPage({
           )}
         </div>
       </main>
+      <Footer />
     </SimpleLayoutWrapper>
   )
 }

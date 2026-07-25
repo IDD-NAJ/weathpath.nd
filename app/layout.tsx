@@ -50,9 +50,9 @@ export default function RootLayout({
       <body className={`${dmSans.variable} ${dmSerif.variable} font-sans antialiased`}>
         <ThemeProvider
           attribute="class"
-          defaultTheme="light"
-          enableSystem={false}
-          forcedTheme="light"
+          defaultTheme="system"
+          enableSystem
+          storageKey="app-theme"
           disableTransitionOnChange
         >
           {children}

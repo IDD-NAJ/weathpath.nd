@@ -14,7 +14,7 @@ import { ResourcesSection } from "@/components/resources-section"
 import { StepGuide } from "@/components/step-guide"
 import { DonateSectionWrapper } from "@/components/donate-section-wrapper"
 import { HomeBanners } from "@/components/home-banners"
-import { CtaFooter } from "@/components/cta-footer"
+import { Footer } from "@/components/footer"
 
 export const dynamic = 'force-dynamic'
 
@@ -41,7 +41,7 @@ export default async function Page() {
         <ResourcesSection />
         <StepGuide />
         <DonateSectionWrapper />
-        <CtaFooter />
+        <Footer />
       </main>
     </div>
   )
