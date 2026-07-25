@@ -90,9 +90,7 @@ export async function PUT(
       return NextResponse.json({ error: "No fields to update" }, { status: 400 })
     }
 
-    updates.push(`updated_at = CURRENT_TIMESTAMP`)
-    
-    // Add courseId to values array at the correct position
+    // Add courseId to values array
     values.push(courseId)
 
     const query = `UPDATE courses SET ${updates.join(", ")} WHERE id = $${paramCount} RETURNING *`
