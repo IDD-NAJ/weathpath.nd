@@ -21,6 +21,7 @@ export function SavedItemsSection() {
   const [favorites, setFavorites] = useState<SavedItem[]>([])
   const [wishlist, setWishlist] = useState<SavedItem[]>([])
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
     loadSavedItems()
@@ -28,14 +29,20 @@ export function SavedItemsSection() {
 
   const loadSavedItems = async () => {
     try {
+      setError(null)
       const res = await fetch('/api/favorites')
       if (res.ok) {
         const data = await res.json()
         setFavorites(data.filter((item: SavedItem) => item.list_type === 'favorite'))
         setWishlist(data.filter((item: SavedItem) => item.list_type === 'wishlist'))
+      } else if (res.status === 401) {
+        setError('Please log in to view saved items')
+      } else {
+        setError('Failed to load saved items')
       }
-    } catch (error) {
-      console.error('[v0] Error loading saved items:', error)
+    } catch (err) {
+      console.error('[v0] Error loading saved items:', err)
+      setError('Error loading saved items')
     } finally {
       setLoading(false)
     }
@@ -71,6 +78,17 @@ export function SavedItemsSection() {
         <CardDescription>Your favorite courses and articles</CardDescription>
       </CardHeader>
       <CardContent>
+        {error && (
+          <div className="rounded-md bg-destructive/10 p-3 text-sm text-destructive mb-4">
+            {error}
+          </div>
+        )}
+        {loading ? (
+          <div className="space-y-2">
+            <div className="h-12 bg-muted rounded animate-pulse" />
+            <div className="h-12 bg-muted rounded animate-pulse" />
+          </div>
+        ) : (
         <Tabs defaultValue="favorites">
           <TabsList className="grid w-full grid-cols-2">
             <TabsTrigger value="favorites">
@@ -169,6 +187,7 @@ export function SavedItemsSection() {
             )}
           </TabsContent>
         </Tabs>
+        )}
       </CardContent>
     </Card>
   )

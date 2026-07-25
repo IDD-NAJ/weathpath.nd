@@ -25,6 +25,7 @@ interface PurchasedCourse {
 export function PurchasedCoursesSection() {
   const [courses, setCourses] = useState<PurchasedCourse[]>([])
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
   const [downloadingId, setDownloadingId] = useState<number | null>(null)
 
   useEffect(() => {
@@ -33,13 +34,19 @@ export function PurchasedCoursesSection() {
 
   const loadPurchasedCourses = async () => {
     try {
+      setError(null)
       const res = await fetch('/api/courses/purchased')
       if (res.ok) {
         const data = await res.json()
         setCourses(data)
+      } else if (res.status === 401) {
+        setError('Please log in to view your purchased courses')
+      } else {
+        setError('Failed to load purchased courses')
       }
-    } catch (error) {
-      console.error('[v0] Error loading purchased courses:', error)
+    } catch (err) {
+      console.error('[v0] Error loading purchased courses:', err)
+      setError('Error loading purchased courses')
     } finally {
       setLoading(false)
     }
@@ -68,6 +75,25 @@ export function PurchasedCoursesSection() {
     } finally {
       setDownloadingId(null)
     }
+  }
+
+  if (error) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <ShoppingBag className="h-5 w-5" />
+            My Purchased Courses
+          </CardTitle>
+          <CardDescription>Access your purchased courses and materials</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="rounded-md bg-destructive/10 p-3 text-sm text-destructive">
+            {error}
+          </div>
+        </CardContent>
+      </Card>
+    )
   }
 
   if (loading) {
