@@ -1,5 +1,39 @@
-// Next.js 16 uses proxy.ts as the middleware entry point.
-// This file is kept as a stub so the VM file-sync does not recreate a
-// conflicting middleware. It intentionally exports nothing that Next.js
-// would recognise as a middleware handler.
-export {}
+import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server"
+
+const isPublicRoute = createRouteMatcher([
+  "/",
+  "/login(.*)",
+  "/signup(.*)",
+  "/forgot-password(.*)",
+  "/reset-password(.*)",
+  "/sso-callback(.*)",
+  "/courses",
+  "/courses/(.*)",
+  "/articles",
+  "/articles/(.*)",
+  "/stories",
+  "/stories/(.*)",
+  "/topics/(.*)",
+  "/community",
+  "/faq",
+  "/contact",
+  "/pricing",
+  "/about",
+  "/api/search",
+  "/api/reviews",
+  "/api/contacts",
+  "/api/faqs",
+])
+
+export default clerkMiddleware(async (auth, request) => {
+  if (!isPublicRoute(request)) {
+    await auth.protect()
+  }
+})
+
+export const config = {
+  matcher: [
+    "/((?!_next|[^?]*\\.(?:html?|css|js(?!on)|jpe?g|webp|png|gif|svg|ttf|woff2?|ico|csv|docx?|xlsx?|zip|webmanifest)).*)",
+    "/(api|trpc)(.*)",
+  ],
+}
