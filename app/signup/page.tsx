@@ -295,8 +295,8 @@ export default function SignupPage() {
       const { error: pwErr } = await signUp!.password({ emailAddress: email, password })
       if (pwErr) throw pwErr
 
-      // v7: sendEmailCode — cast to access v7 method tsc resolves from older type
-      const { error: codeErr } = await (signUp as any).sendEmailCode()
+      // v7: verifications.sendEmailCode() triggers the OTP email
+      const { error: codeErr } = await signUp!.verifications.sendEmailCode()
       if (codeErr) throw codeErr
 
       setResendCooldown(RESEND_COOLDOWN)
@@ -309,9 +309,15 @@ export default function SignupPage() {
   const handleVerify = useCallback(async (code: string) => {
     setLoading(true); setError("")
     try {
-      // v7: verifyEmailCode — cast to access v7 method
-      const { error: verifyErr } = await (signUp as any).verifyEmailCode({ code })
+      // v7: verifications.verifyEmailCode() validates the OTP
+      const { error: verifyErr } = await signUp!.verifications.verifyEmailCode({ code })
       if (verifyErr) throw verifyErr
+
+      // Finalize to activate the session once status is complete
+      if (signUp!.status === "complete") {
+        const { error: finalErr } = await signUp!.finalize()
+        if (finalErr) throw finalErr
+      }
 
       // Persist interests (non-blocking — the sync webhook may not have fired yet)
       if (selectedInterests.length > 0) {
@@ -330,8 +336,8 @@ export default function SignupPage() {
   const handleResend = useCallback(async () => {
     setLoading(true); setError("")
     try {
-      // v7: sendEmailCode — cast to access v7 method
-      const { error: err } = await (signUp as any).sendEmailCode()
+      // v7: verifications.sendEmailCode() to resend the OTP
+      const { error: err } = await signUp!.verifications.sendEmailCode()
       if (err) throw err
       setResendCooldown(RESEND_COOLDOWN)
     } catch (err: unknown) { setError(mapClerkError(err)) }

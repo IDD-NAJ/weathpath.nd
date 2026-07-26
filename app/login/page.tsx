@@ -79,16 +79,18 @@ export default function LoginPage() {
     setError("")
 
     try {
-      // Clerk v7: signIn.password() returns { data, error }
+      // Clerk v7: signIn.password() returns { error } — all-in-one password sign-in
       const { error: pwErr } = await signIn.password({
         emailAddress: email,
         password,
       })
       if (pwErr) throw pwErr
 
-      // Finalize (activates the session)
-      const { error: finalErr } = await signIn.finalize()
-      if (finalErr) throw finalErr
+      // Only finalize when status is 'complete' (no MFA required)
+      if (signIn.status === "complete") {
+        const { error: finalErr } = await signIn.finalize()
+        if (finalErr) throw finalErr
+      }
 
       setSuccess(true)
       setAttempts(0)
