@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useCallback } from "react"
+import { useState, useCallback, useEffect } from "react"
 import Link from "next/link"
 import { useSignIn } from "@clerk/nextjs"
 import { useRouter } from "next/navigation"
@@ -8,53 +8,70 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Checkbox } from "@/components/ui/checkbox"
 import { OAuthButtons } from "@/components/oauth-buttons"
-import { Eye, EyeOff, Mail, Lock, TrendingUp, ShieldCheck, AlertCircle, Loader2 } from "lucide-react"
+import {
+  Eye, EyeOff, Mail, Lock, TrendingUp,
+  ShieldCheck, AlertCircle, Loader2, CheckCircle2
+} from "lucide-react"
 
+// ---------------------------------------------------------------------------
+// Helpers
+// ---------------------------------------------------------------------------
 const MAX_ATTEMPTS = 5
+const LOCKOUT_MS = 15 * 60 * 1000
 const LOCKOUT_MINUTES = 15
-const LOCKOUT_MS = LOCKOUT_MINUTES * 60 * 1000
 
-function mapClerkError(err: any): string {
-  const code = (err?.errors?.[0]?.code ?? err?.code ?? "") as string
-  const message = (err?.errors?.[0]?.message ?? err?.message ?? "") as string
-
-  if (code === "form_password_incorrect" || code === "form_identifier_not_found") {
-    return "Invalid email or password. Please check your credentials."
-  }
-  if (code === "too_many_requests" || code === "lockout") {
-    return `Too many failed attempts. Please wait ${LOCKOUT_MINUTES} minutes before trying again.`
-  }
-  if (code === "session_exists") {
+function mapClerkError(err: unknown): string {
+  const e = err as { errors?: { code?: string; message?: string }[]; code?: string; message?: string }
+  const code = e?.errors?.[0]?.code ?? e?.code ?? ""
+  const msg  = e?.errors?.[0]?.message ?? e?.message ?? ""
+  if (code === "form_password_incorrect" || code === "form_identifier_not_found")
+    return "Invalid email or password."
+  if (code === "too_many_requests" || code === "lockout")
+    return `Too many attempts — please wait ${LOCKOUT_MINUTES} minutes.`
+  if (code === "session_exists")
     return "You are already signed in."
-  }
-  return message || "Something went wrong. Please try again."
+  return msg || "Something went wrong. Please try again."
 }
 
+// ---------------------------------------------------------------------------
+// Page
+// ---------------------------------------------------------------------------
 export default function LoginPage() {
-  // useSignIn() returns { signIn, errors, fetchStatus } in Clerk v7
+  // Clerk v7: useSignIn() returns { signIn, errors, fetchStatus }
+  // signIn is a SignInFutureResource — NOT the old SignInResource
   const { signIn } = useSignIn()
   const router = useRouter()
 
-  const [email, setEmail] = useState("")
-  const [password, setPassword] = useState("")
+  const [email, setEmail]               = useState("")
+  const [password, setPassword]         = useState("")
   const [showPassword, setShowPassword] = useState(false)
-  const [rememberMe, setRememberMe] = useState(false)
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState("")
-  const [success, setSuccess] = useState(false)
-  const [attempts, setAttempts] = useState(0)
-  const [lockedUntil, setLockedUntil] = useState<number | null>(null)
+  const [rememberMe, setRememberMe]     = useState(false)
+  const [loading, setLoading]           = useState(false)
+  const [error, setError]               = useState("")
+  const [success, setSuccess]           = useState(false)
+  const [attempts, setAttempts]         = useState(0)
+  const [lockedUntil, setLockedUntil]   = useState<number | null>(null)
+
+  // Countdown display for the lockout timer
+  const [remaining, setRemaining] = useState(0)
+  useEffect(() => {
+    if (!lockedUntil) return
+    const tick = () => setRemaining(Math.max(0, Math.ceil((lockedUntil - Date.now()) / 1000)))
+    tick()
+    const id = setInterval(tick, 1000)
+    return () => clearInterval(id)
+  }, [lockedUntil])
 
   const isLocked = lockedUntil !== null && Date.now() < lockedUntil
 
   const handleSignIn = useCallback(async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!signIn || isLocked) return
+    if (!signIn || isLocked || loading) return
 
     if (attempts >= MAX_ATTEMPTS) {
       const until = Date.now() + LOCKOUT_MS
       setLockedUntil(until)
-      setError(`Too many failed attempts. Please wait ${LOCKOUT_MINUTES} minutes.`)
+      setError(`Locked — too many failed attempts. Try again in ${LOCKOUT_MINUTES} minutes.`)
       return
     }
 
@@ -62,71 +79,75 @@ export default function LoginPage() {
     setError("")
 
     try {
-      // v7 API: signIn.password() then signIn.finalize()
-      const pwResult = await signIn.password({ emailAddress: email, password })
-      if (pwResult.error) {
-        throw pwResult.error
-      }
+      // Clerk v7: signIn.password() returns { data, error }
+      const { error: pwErr } = await signIn.password({
+        emailAddress: email,
+        password,
+      })
+      if (pwErr) throw pwErr
 
-      if (signIn.status === "complete") {
-        const finalResult = await signIn.finalize()
-        if (finalResult.error) throw finalResult.error
-        setSuccess(true)
-        setAttempts(0)
-        setTimeout(() => router.push("/dashboard"), 800)
-      } else {
-        setError("Additional verification required. Please check your email.")
-      }
-    } catch (err: any) {
+      // Finalize (activates the session)
+      const { error: finalErr } = await signIn.finalize()
+      if (finalErr) throw finalErr
+
+      setSuccess(true)
+      setAttempts(0)
+      setTimeout(() => router.push("/dashboard"), 700)
+    } catch (err: unknown) {
       const newAttempts = attempts + 1
       setAttempts(newAttempts)
-
       if (newAttempts >= MAX_ATTEMPTS) {
         const until = Date.now() + LOCKOUT_MS
         setLockedUntil(until)
-        setError(`Account temporarily locked after ${MAX_ATTEMPTS} failed attempts. Try again in ${LOCKOUT_MINUTES} minutes.`)
+        setError(`Account locked after ${MAX_ATTEMPTS} failed attempts. Try again in ${LOCKOUT_MINUTES} minutes.`)
       } else {
-        const remaining = MAX_ATTEMPTS - newAttempts
-        const baseMsg = mapClerkError(err)
-        setError(remaining <= 2
-          ? `${baseMsg} (${remaining} attempt${remaining === 1 ? "" : "s"} remaining)`
-          : baseMsg)
+        const left = MAX_ATTEMPTS - newAttempts
+        const base = mapClerkError(err)
+        setError(left <= 2 ? `${base} (${left} attempt${left === 1 ? "" : "s"} left)` : base)
       }
     } finally {
       setLoading(false)
     }
-  }, [signIn, email, password, attempts, isLocked, router])
+  }, [signIn, email, password, attempts, isLocked, loading, router])
 
   return (
     <div className="min-h-screen bg-background flex">
-      {/* Left brand panel */}
+      {/* ── Left brand panel ── */}
       <div className="hidden lg:flex lg:w-5/12 xl:w-1/2 flex-col justify-between p-12 bg-card border-r border-border relative overflow-hidden">
-        <div className="absolute inset-0 opacity-[0.03]" style={{
-          backgroundImage: "repeating-linear-gradient(0deg, transparent, transparent 59px, hsl(var(--border)) 59px, hsl(var(--border)) 60px), repeating-linear-gradient(90deg, transparent, transparent 59px, hsl(var(--border)) 59px, hsl(var(--border)) 60px)"
-        }} />
+        {/* subtle grid texture */}
+        <div
+          className="absolute inset-0 opacity-[0.03]"
+          style={{
+            backgroundImage:
+              "repeating-linear-gradient(0deg,transparent,transparent 59px,hsl(var(--border)) 59px,hsl(var(--border)) 60px),repeating-linear-gradient(90deg,transparent,transparent 59px,hsl(var(--border)) 59px,hsl(var(--border)) 60px)",
+          }}
+        />
+
         <Link href="/" className="relative flex items-center gap-2.5 w-fit">
           <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary">
             <TrendingUp className="h-5 w-5 text-primary-foreground" />
           </div>
-          <span className="text-xl font-bold tracking-tight text-foreground">WealthPath</span>
+          <span className="text-xl font-bold tracking-tight font-sans text-foreground">WealthPath</span>
         </Link>
 
         <div className="relative space-y-8">
           <div>
-            <p className="text-xs uppercase tracking-widest text-muted-foreground mb-4 font-medium">Trusted by thousands</p>
-            <h2 className="font-serif text-4xl xl:text-5xl font-normal text-foreground leading-tight">
+            <p className="text-xs uppercase tracking-widest text-muted-foreground mb-3 font-medium">Trusted by thousands</p>
+            <h2 className="font-serif text-4xl xl:text-5xl font-normal text-foreground leading-tight text-balance">
               Build wealth<br />with clarity.
             </h2>
-            <p className="mt-4 text-muted-foreground leading-relaxed max-w-xs">
+            <p className="mt-4 text-muted-foreground leading-relaxed max-w-xs text-sm">
               Structured courses, real-world tools, and a community that takes financial freedom seriously.
             </p>
           </div>
-          <div className="rounded-xl border border-border bg-background/50 p-5 backdrop-blur-sm">
+
+          {/* Testimonial card */}
+          <div className="rounded-xl border border-border bg-background/50 p-5">
             <p className="text-sm text-foreground leading-relaxed">
               &ldquo;WealthPath gave me the framework I needed to finally start investing with confidence.&rdquo;
             </p>
-            <div className="mt-3 flex items-center gap-2.5">
-              <div className="h-8 w-8 rounded-full bg-primary/20 flex items-center justify-center">
+            <div className="mt-4 flex items-center gap-2.5">
+              <div className="h-8 w-8 rounded-full bg-primary/20 flex items-center justify-center flex-shrink-0">
                 <span className="text-xs font-semibold text-primary">MJ</span>
               </div>
               <div>
@@ -143,15 +164,15 @@ export default function LoginPage() {
         </div>
       </div>
 
-      {/* Right form panel */}
+      {/* ── Right form panel ── */}
       <div className="flex-1 flex items-center justify-center p-6 sm:p-10">
         <div className="w-full max-w-[420px]">
           {/* Mobile logo */}
-          <Link href="/" className="lg:hidden flex items-center gap-2 mb-8 justify-center">
+          <Link href="/" className="lg:hidden flex items-center justify-center gap-2 mb-8">
             <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary">
               <TrendingUp className="h-5 w-5 text-primary-foreground" />
             </div>
-            <span className="text-xl font-bold tracking-tight text-foreground">WealthPath</span>
+            <span className="text-xl font-bold tracking-tight font-sans text-foreground">WealthPath</span>
           </Link>
 
           <div className="mb-8">
@@ -159,7 +180,7 @@ export default function LoginPage() {
             <h1 className="font-serif text-3xl font-normal text-foreground">Sign in</h1>
           </div>
 
-          <OAuthButtons />
+          <OAuthButtons mode="signin" />
 
           <div className="relative my-6">
             <div className="absolute inset-0 flex items-center">
@@ -172,41 +193,51 @@ export default function LoginPage() {
             </div>
           </div>
 
+          {/* Lockout banner */}
           {isLocked && (
             <div className="mb-5 rounded-lg border border-amber-500/30 bg-amber-500/10 p-4 flex gap-3">
               <AlertCircle className="h-4 w-4 text-amber-500 flex-shrink-0 mt-0.5" />
-              <p className="text-sm text-amber-600 dark:text-amber-400">
-                Account temporarily locked. Please wait {LOCKOUT_MINUTES} minutes before trying again.
-              </p>
+              <div>
+                <p className="text-sm font-medium text-amber-600 dark:text-amber-400">Account temporarily locked</p>
+                <p className="text-xs text-amber-600/80 dark:text-amber-400/80 mt-0.5 tabular-nums">
+                  {Math.ceil(remaining / 60)}m {remaining % 60}s remaining
+                </p>
+              </div>
             </div>
           )}
 
+          {/* Success banner */}
           {success && (
-            <div className="mb-5 rounded-lg border border-green-500/30 bg-green-500/10 p-4">
+            <div className="mb-5 rounded-lg border border-green-500/30 bg-green-500/10 p-4 flex gap-3">
+              <CheckCircle2 className="h-4 w-4 text-green-500 flex-shrink-0 mt-0.5" />
               <p className="text-sm text-green-600 dark:text-green-400 font-medium">
-                Signed in successfully — redirecting...
+                Signed in — redirecting...
               </p>
             </div>
           )}
 
-          {error && !isLocked && (
+          {/* Error banner */}
+          {error && !isLocked && !success && (
             <div className="mb-5 rounded-lg border border-destructive/30 bg-destructive/10 p-4 flex gap-3">
               <AlertCircle className="h-4 w-4 text-destructive flex-shrink-0 mt-0.5" />
               <p className="text-sm text-destructive">{error}</p>
             </div>
           )}
 
-          <form onSubmit={handleSignIn} className="space-y-4">
+          <form onSubmit={handleSignIn} className="space-y-4" noValidate>
             <div className="space-y-1.5">
-              <label className="text-xs uppercase tracking-widest font-medium text-muted-foreground">Email</label>
+              <label htmlFor="email" className="text-xs uppercase tracking-widest font-medium text-muted-foreground">
+                Email
+              </label>
               <div className="relative">
                 <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
                 <Input
+                  id="email"
                   type="email"
                   placeholder="you@example.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="pl-10 h-11 bg-card border-border focus:border-primary rounded-lg"
+                  className="pl-10 h-11 bg-card border-border rounded-lg"
                   required
                   autoComplete="email"
                   disabled={loading || success || isLocked}
@@ -216,19 +247,26 @@ export default function LoginPage() {
 
             <div className="space-y-1.5">
               <div className="flex items-center justify-between">
-                <label className="text-xs uppercase tracking-widest font-medium text-muted-foreground">Password</label>
-                <Link href="/forgot-password" className="text-xs text-primary hover:text-primary/80 transition-colors font-medium" tabIndex={-1}>
+                <label htmlFor="password" className="text-xs uppercase tracking-widest font-medium text-muted-foreground">
+                  Password
+                </label>
+                <Link
+                  href="/forgot-password"
+                  className="text-xs text-primary hover:text-primary/80 transition-colors font-medium"
+                  tabIndex={-1}
+                >
                   Forgot password?
                 </Link>
               </div>
               <div className="relative">
                 <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
                 <Input
+                  id="password"
                   type={showPassword ? "text" : "password"}
                   placeholder="••••••••"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="pl-10 pr-10 h-11 bg-card border-border focus:border-primary rounded-lg"
+                  className="pl-10 pr-10 h-11 bg-card border-border rounded-lg"
                   required
                   autoComplete="current-password"
                   disabled={loading || success || isLocked}
@@ -238,8 +276,8 @@ export default function LoginPage() {
                   onClick={() => setShowPassword((v) => !v)}
                   className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
                   tabIndex={-1}
-                  disabled={loading || success}
                   aria-label={showPassword ? "Hide password" : "Show password"}
+                  disabled={loading || success}
                 >
                   {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                 </button>
@@ -252,7 +290,6 @@ export default function LoginPage() {
                 checked={rememberMe}
                 onCheckedChange={(c) => setRememberMe(c as boolean)}
                 disabled={loading || success}
-                className="rounded"
               />
               <label htmlFor="remember" className="text-sm text-muted-foreground cursor-pointer select-none">
                 Keep me signed in

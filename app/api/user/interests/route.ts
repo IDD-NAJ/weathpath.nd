@@ -44,9 +44,9 @@ export async function GET() {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
   }
 
-  const rows = await sql`
+  const rows = (await sql`
     SELECT interests FROM users WHERE id = ${user.id}
-  `
+  `) as { interests: string[] }[]
 
   return NextResponse.json({ interests: rows[0]?.interests ?? [] })
 }

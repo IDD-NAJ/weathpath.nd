@@ -19,7 +19,7 @@ import { sql } from "@/lib/db"
 export type UserRole = "user" | "admin"
 
 export interface SessionUser {
-  id: string           // internal UUID — safe to use in all FK queries
+  id: string                       // internal UUID — safe to use in all FK queries
   email: string
   name: string
   role: UserRole
@@ -27,7 +27,7 @@ export interface SessionUser {
   created_at: string
   profile_photo_url?: string | null
   bio?: string | null
-  clerk_id: string     // Clerk user_xxx — available if callers need it
+  clerk_id: string                 // Clerk user_xxx — available if callers need it
 }
 
 /**
@@ -40,14 +40,14 @@ export interface SessionUser {
 async function resolveClerkUser(clerkId: string): Promise<SessionUser | null> {
   try {
     // Fast path: clerk_id already linked
-    const existing = await sql<SessionUser[]>`
+    const existing = (await sql`
       SELECT id, email, name, role, is_active, created_at, profile_photo_url, bio, clerk_id
       FROM users
       WHERE clerk_id = ${clerkId}
         AND is_active = true
       LIMIT 1
-    `
-    if (existing.length > 0) return existing[0] as SessionUser
+    `) as SessionUser[]
+    if (existing.length > 0) return existing[0]
 
     // First-time sign-in: fetch the Clerk profile to get email + name
     const clerkUser = await currentUser()
@@ -62,7 +62,7 @@ async function resolveClerkUser(clerkId: string): Promise<SessionUser | null> {
     if (!email) return null
 
     // Link-by-email: if an existing user row has this email, attach the clerk_id
-    const linked = await sql<SessionUser[]>`
+    const linked = (await sql`
       UPDATE users
       SET clerk_id = ${clerkId},
           profile_photo_url = COALESCE(profile_photo_url, ${imageUrl}),
@@ -71,12 +71,12 @@ async function resolveClerkUser(clerkId: string): Promise<SessionUser | null> {
         AND clerk_id IS NULL
         AND is_active = true
       RETURNING id, email, name, role, is_active, created_at, profile_photo_url, bio, clerk_id
-    `
-    if (linked.length > 0) return linked[0] as SessionUser
+    `) as SessionUser[]
+    if (linked.length > 0) return linked[0]
 
     // Brand-new user: create a row with role='user'
     const newId = crypto.randomUUID()
-    const created = await sql<SessionUser[]>`
+    const created = (await sql`
       INSERT INTO users (id, name, email, clerk_id, role, is_active, profile_photo_url)
       VALUES (${newId}, ${name}, ${email}, ${clerkId}, 'user', true, ${imageUrl})
       ON CONFLICT (email) DO UPDATE
@@ -84,8 +84,8 @@ async function resolveClerkUser(clerkId: string): Promise<SessionUser | null> {
             profile_photo_url = COALESCE(users.profile_photo_url, EXCLUDED.profile_photo_url),
             updated_at = NOW()
       RETURNING id, email, name, role, is_active, created_at, profile_photo_url, bio, clerk_id
-    `
-    return created.length > 0 ? (created[0] as SessionUser) : null
+    `) as SessionUser[]
+    return created.length > 0 ? created[0] : null
   } catch {
     return null
   }
