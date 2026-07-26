@@ -1,10 +1,9 @@
+import { getSql } from "@/lib/db"
 import Link from "next/link"
 import { ShoppingCart, BookOpen, Search, Star, Eye, ChevronLeft, ChevronRight } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { SimpleLayoutWrapper } from "@/components/layout-wrapper"
 import { Footer } from "@/components/footer"
-import { neon } from "@neondatabase/serverless"
-
 export const metadata = {
   title: "Premium Courses | WealthPath",
   description: "Master wealth-building with expert-led courses delivered to your email.",
@@ -58,7 +57,7 @@ export default async function CoursesPage({
   const viewCounts: Record<string, number> = {}
 
   try {
-    const sql = neon(process.env.DATABASE_URL!)
+    const sql = getSql()
 
     const conditions: string[] = []
     const values: any[] = []

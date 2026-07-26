@@ -1,3 +1,4 @@
+import { getSql } from "@/lib/db"
 import { neon } from '@neondatabase/serverless'
 
 export interface Product {
@@ -22,7 +23,7 @@ export async function getProducts(): Promise<Product[]> {
   }
 
   try {
-    const sql = neon(process.env.DATABASE_URL!)
+    const sql = getSql()
     const courses = await sql(
       'SELECT id, slug, title, description, price_cents, cover_image FROM courses WHERE is_visible = true AND status = $1 ORDER BY featured DESC, created_at DESC',
       ['published']

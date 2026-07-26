@@ -1,4 +1,4 @@
-import { sql } from "@/lib/db"
+import { sql, getSql } from "@/lib/db"
 import { NextResponse } from "next/server"
 
 export async function GET(request: Request) {
@@ -50,7 +50,7 @@ export async function POST(request: Request) {
       )
     }
 
-    const sql = neon(process.env.DATABASE_URL!)
+    const sql = getSql()
 
     // Get or create author
     const members = await sql(

@@ -1,4 +1,4 @@
-import { sql } from "@/lib/db"
+import { sql, getSql } from "@/lib/db"
 import { NextRequest, NextResponse } from 'next/server'
 
 export async function GET() {
@@ -16,7 +16,7 @@ export async function GET() {
 
 export async function POST(request: NextRequest) {
   try {
-    const sql = neon(process.env.DATABASE_URL!)
+    const sql = getSql()
     const { title, message, bannerType, linkUrl, linkText, bgColor, startsAt, endsAt, isActive } = await request.json()
 
     if (!title || !message) {

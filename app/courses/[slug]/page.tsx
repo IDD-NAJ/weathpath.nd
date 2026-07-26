@@ -1,3 +1,4 @@
+import { getSql } from "@/lib/db"
 import { notFound } from "next/navigation"
 import Link from "next/link"
 import { ArrowLeft, CheckCircle2, ShoppingCart, Users, Star, Clock, Play } from "lucide-react"
@@ -6,7 +7,6 @@ import { SimpleLayoutWrapper } from "@/components/layout-wrapper"
 import { CourseCheckout } from "@/components/course-checkout"
 import { SaveButton } from "@/components/save-button"
 import { CourseModules } from "@/components/course-modules"
-import { neon } from "@neondatabase/serverless"
 import { verifyPurchaseAccess } from "@/lib/purchase-service"
 import { headers } from "next/headers"
 import { ViewTracker } from "@/components/view-tracker"
@@ -16,7 +16,7 @@ export const dynamic = 'force-dynamic'
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
   const resolvedParams = await params
-  const sql = neon(process.env.DATABASE_URL!)
+  const sql = getSql()
   const result = await sql(
     "SELECT title, description FROM courses WHERE slug = $1",
     [resolvedParams.slug]
@@ -47,7 +47,7 @@ export default async function CourseDetailPage({
   let relatedCourses: any[] = []
 
   try {
-    const sql = neon(process.env.DATABASE_URL!)
+    const sql = getSql()
     const result = await sql(
       "SELECT * FROM courses WHERE slug = $1",
       [resolvedParams.slug]

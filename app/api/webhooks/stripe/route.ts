@@ -1,4 +1,4 @@
-import { sql } from "@/lib/db"
+import { sql, getSql } from "@/lib/db"
 import { getStripe } from '@/lib/stripe'
 import { createPurchase } from '@/lib/purchase-service'
 
@@ -32,7 +32,7 @@ export async function POST(request: Request) {
 
       // Donation sessions are completed separately
       if (session.metadata?.type === 'donation') {
-        const donationSql = neon(process.env.DATABASE_URL!)
+        const donationSql = getSql()
         await donationSql(
           `UPDATE donations SET status = 'completed', completed_at = NOW() WHERE stripe_session_id = $1 AND status != 'completed'`,
           [session.id]

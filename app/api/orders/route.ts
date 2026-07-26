@@ -1,4 +1,4 @@
-import { sql } from "@/lib/db"
+import { sql, getSql } from "@/lib/db"
 import { randomUUID } from 'crypto'
 
 export async function POST(request: Request) {
@@ -47,7 +47,7 @@ export async function GET(request: Request) {
     const email = searchParams.get('email')
     const order_id = searchParams.get('id')
 
-    const sql = neon(process.env.DATABASE_URL!)
+    const sql = getSql()
 
     if (order_id) {
       const result = await sql(

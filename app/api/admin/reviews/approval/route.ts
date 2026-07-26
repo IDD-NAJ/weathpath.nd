@@ -1,4 +1,4 @@
-import { sql } from "@/lib/db"
+import { sql, getSql } from "@/lib/db"
 import { getCurrentUser } from "@/lib/auth"
 import { NextResponse } from "next/server"
 
@@ -58,7 +58,7 @@ export async function PUT(request: Request) {
       return NextResponse.json({ error: "Invalid status" }, { status: 400 })
     }
 
-    const sql = neon(process.env.DATABASE_URL!)
+    const sql = getSql()
 
     const result = await sql(`
       UPDATE reviews

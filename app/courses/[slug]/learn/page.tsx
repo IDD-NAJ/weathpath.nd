@@ -1,3 +1,4 @@
+import { getSql } from "@/lib/db"
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import { ArrowLeft, Lock, BookOpen, CheckCircle2 } from 'lucide-react'
@@ -25,7 +26,7 @@ export default async function LessonViewerPage({
   let lessons: any[] = []
 
   try {
-    const sql = neon(process.env.DATABASE_URL!)
+    const sql = getSql()
     const courseResult = await sql(
       'SELECT id, slug, title, description, cover_image, download_url FROM courses WHERE slug = $1',
       [resolvedParams.slug]

@@ -1,8 +1,7 @@
+import { getSql } from "@/lib/db"
 import { Navigation } from "@/components/navigation"
 import { Footer } from "@/components/footer"
 import { ChevronDown } from "lucide-react"
-import { neon } from "@neondatabase/serverless"
-
 export const metadata = {
   title: "FAQ — WealthPath",
   description: "Frequently asked questions about WealthPath courses and services.",
@@ -12,7 +11,7 @@ export const dynamic = 'force-dynamic'
 
 async function getFAQs() {
   try {
-    const sql = neon(process.env.DATABASE_URL!)
+    const sql = getSql()
     const faqs = await sql(
       `SELECT id, question, answer, category FROM faqs 
        WHERE is_active = true 

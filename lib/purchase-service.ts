@@ -1,3 +1,4 @@
+import { getSql } from "@/lib/db"
 import { neon } from '@neondatabase/serverless'
 
 /**
@@ -14,7 +15,7 @@ export async function verifyPurchaseAccess(
   }
 
   try {
-    const sql = neon(process.env.DATABASE_URL!)
+    const sql = getSql()
 
     if (email) {
       // Check for guest purchase or registered user purchase via email
@@ -58,7 +59,7 @@ export async function getUserPurchasedCourses(
   }
 
   try {
-    const sql = neon(process.env.DATABASE_URL!)
+    const sql = getSql()
 
     if (email) {
       const result = await sql(
@@ -98,7 +99,7 @@ export async function createPurchase(
   userId?: string
 ) {
   try {
-    const sql = neon(process.env.DATABASE_URL!)
+    const sql = getSql()
     
     const result = await sql(
       `INSERT INTO user_purchases (user_email, course_id, order_id, amount_cents, payment_status, user_id, created_at, updated_at)

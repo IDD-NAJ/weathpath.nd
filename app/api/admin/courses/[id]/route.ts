@@ -1,4 +1,4 @@
-import { sql } from "@/lib/db"
+import { sql, getSql } from "@/lib/db"
 import { NextResponse } from "next/server"
 
 export async function GET(
@@ -32,7 +32,7 @@ export async function PUT(
     const courseId = parseInt(params.id)
     const { title, description, price_cents, category, level, lessons, is_visible, status, slug } = await request.json()
 
-    const sql = neon(process.env.DATABASE_URL!)
+    const sql = getSql()
 
     // Build update query dynamically based on provided fields
     const updates: string[] = []
@@ -113,7 +113,7 @@ export async function DELETE(
 ) {
   try {
     const courseId = parseInt(params.id)
-    const sql = neon(process.env.DATABASE_URL!)
+    const sql = getSql()
 
     const result = await sql(
       `DELETE FROM courses WHERE id = $1 RETURNING id`,

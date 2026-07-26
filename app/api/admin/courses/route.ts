@@ -1,4 +1,4 @@
-import { sql } from "@/lib/db"
+import { sql, getSql } from "@/lib/db"
 import { NextResponse } from "next/server"
 
 export async function GET() {
@@ -26,7 +26,7 @@ export async function POST(request: Request) {
       )
     }
 
-    const sql = neon(process.env.DATABASE_URL!)
+    const sql = getSql()
 
     const result = await sql(
       `INSERT INTO courses (title, description, slug, price_cents, category, level, lessons, is_visible, status, cover_image)

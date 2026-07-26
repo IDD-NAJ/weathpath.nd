@@ -1,4 +1,4 @@
-import { sql } from "@/lib/db"
+import { sql, getSql } from "@/lib/db"
 import { NextRequest, NextResponse } from 'next/server'
 
 export async function PUT(
@@ -43,7 +43,7 @@ export async function DELETE(
   { params }: { params: { id: string } }
 ) {
   try {
-    const sql = neon(process.env.DATABASE_URL!)
+    const sql = getSql()
     const bannerId = parseInt(params.id)
 
     const result = await sql(`DELETE FROM banners WHERE id = $1`, [bannerId])
