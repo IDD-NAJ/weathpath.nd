@@ -37,3 +37,7 @@ Thumbs.db
 
 # clerk configuration (can include secrets)
 /.clerk/
+
+# Next.js 16 requires proxy.ts only - middleware.ts causes conflicts
+middleware.ts
+middleware.ts.bak
