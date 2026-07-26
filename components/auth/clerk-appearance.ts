@@ -40,8 +40,11 @@ export const clerkAppearance: Appearance = {
       "h-11 bg-primary text-primary-foreground hover:bg-primary/90 rounded-sm text-sm font-medium normal-case shadow-none",
     formFieldAction: "text-primary hover:text-primary/80 font-medium",
     identityPreviewEditButton: "text-primary hover:text-primary/80",
-    footer: "bg-transparent",
+    // The dev-mode badge renders inside the footer, so give the stack room to
+    // breathe instead of letting the two overlap.
+    footer: "bg-transparent gap-3",
     footerAction: "bg-transparent",
+    footerPages: "mt-1",
     footerActionText: "text-sm text-muted-foreground",
     footerActionLink: "text-primary font-medium hover:text-primary/80",
     formFieldSuccessText: "text-accent",
