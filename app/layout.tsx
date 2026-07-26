@@ -48,8 +48,8 @@ export default function RootLayout({
 }>) {
   return (
     <ClerkProvider>
-      <html lang="en" suppressHydrationWarning className="bg-background">
-        <body className={`${dmSans.variable} ${dmSerif.variable} font-sans antialiased`}>
+      <html lang="en" suppressHydrationWarning>
+        <body className={`${dmSans.variable} ${dmSerif.variable} font-sans antialiased bg-background text-foreground`}>
           <ThemeProvider
             attribute="class"
             defaultTheme="system"

@@ -1,11 +1,9 @@
 @import 'tailwindcss';
 @import 'tw-animate-css';
 
-@custom-variant dark (&:is(.dark *));
+@custom-variant dark (&:where(.dark, .dark *));
 
-html {
-  zoom: 0.95;
-}
+
 
 :root {
   /* ─── Neutral Base – warm cream (JSTOR) ─── */
@@ -172,12 +170,9 @@ html {
   }
   html {
     scroll-behavior: smooth;
-    transform: scale(0.9);
-    transform-origin: top center;
-    width: 100%;
   }
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground min-h-screen;
     font-feature-settings: "kern" 1, "liga" 1;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
