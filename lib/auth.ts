@@ -1,7 +1,6 @@
-import { cookies } from "next/headers"
 import { redirect } from "next/navigation"
+import { auth, currentUser } from "@clerk/nextjs/server"
 import { sql } from "@/lib/db"
-import bcrypt from "bcryptjs"
 
 export type UserRole = "user" | "admin"
 
@@ -14,83 +13,133 @@ export interface SessionUser {
   created_at: string
   profile_photo_url?: string | null
   bio?: string | null
+  clerk_user_id?: string | null
 }
 
-const SESSION_COOKIE = "wp_session"
-const SESSION_MAX_AGE = 60 * 60 * 24 * 7 // 7 days
-
-export async function hashPassword(password: string): Promise<string> {
-  return bcrypt.hash(password, 12)
+type ClerkProfile = {
+  clerkUserId: string
+  email: string
+  name: string
+  imageUrl: string | null
+  createdAt: string
+  metadataRole: UserRole
 }
 
-export async function verifyPassword(
-  password: string,
-  hash: string
-): Promise<boolean> {
-  return bcrypt.compare(password, hash)
-}
+/**
+ * Mirrors the Clerk user into the local `users` table so the rest of the app
+ * can keep joining on `users.id` (a UUID) for progress, favorites, articles, etc.
+ * Clerk remains the source of truth for credentials and sessions.
+ */
+async function syncUser(profile: ClerkProfile): Promise<SessionUser> {
+  const { clerkUserId, email, name, imageUrl, metadataRole } = profile
 
-export async function createSession(userId: string): Promise<string> {
-  const sessionId = crypto.randomUUID()
-
-  // Use DB-side NOW() to avoid JS/Postgres clock skew
-  await sql`
-    INSERT INTO sessions (id, user_id, expires_at)
-    VALUES (${sessionId}, ${userId}, NOW() + INTERVAL '7 days')
+  const linked = await sql`
+    SELECT id, email, name, role, is_active, created_at, profile_photo_url, bio, clerk_user_id
+    FROM users
+    WHERE clerk_user_id = ${clerkUserId}
+    LIMIT 1
   `
 
-  // Clean up any expired sessions for this user
-  await sql`DELETE FROM sessions WHERE user_id = ${userId} AND expires_at <= NOW()`
+  if (linked.length > 0) {
+    const row = linked[0] as SessionUser
+    const needsUpdate =
+      (email && row.email !== email) || (name && row.name !== name)
 
-  const cookieStore = await cookies()
-  cookieStore.set(SESSION_COOKIE, sessionId, {
-    httpOnly: true,
-    // Only use Secure flag on actual production deploys (HTTPS).
-    // Preview/development environments may run on HTTP, which silently
-    // drops Secure cookies and breaks the session entirely.
-    secure: process.env.VERCEL_ENV === "production",
-    sameSite: "lax",
-    path: "/",
-    maxAge: SESSION_MAX_AGE,
-  })
+    if (needsUpdate) {
+      await sql`
+        UPDATE users
+        SET email = ${email || row.email},
+            name = ${name || row.name},
+            updated_at = now()
+        WHERE id = ${row.id}
+      `
+      return { ...row, email: email || row.email, name: name || row.name }
+    }
 
-  return sessionId
+    return row
+  }
+
+  // Existing account created before Clerk — link it by email.
+  if (email) {
+    const byEmail = await sql`
+      SELECT id, email, name, role, is_active, created_at, profile_photo_url, bio, clerk_user_id
+      FROM users
+      WHERE lower(email) = lower(${email})
+      LIMIT 1
+    `
+
+    if (byEmail.length > 0) {
+      const row = byEmail[0] as SessionUser
+      await sql`
+        UPDATE users
+        SET clerk_user_id = ${clerkUserId}, updated_at = now()
+        WHERE id = ${row.id}
+      `
+      return { ...row, clerk_user_id: clerkUserId }
+    }
+  }
+
+  const inserted = await sql`
+    INSERT INTO users (name, email, role, is_active, clerk_user_id, profile_photo_url)
+    VALUES (${name}, ${email}, ${metadataRole}, true, ${clerkUserId}, ${imageUrl})
+    ON CONFLICT (clerk_user_id) DO UPDATE
+      SET name = EXCLUDED.name, email = EXCLUDED.email, updated_at = now()
+    RETURNING id, email, name, role, is_active, created_at, profile_photo_url, bio, clerk_user_id
+  `
+
+  return inserted[0] as SessionUser
 }
 
-export async function destroySession(): Promise<void> {
-  const cookieStore = await cookies()
-  const sessionId = cookieStore.get(SESSION_COOKIE)?.value
+function toProfile(clerkUser: NonNullable<Awaited<ReturnType<typeof currentUser>>>): ClerkProfile {
+  const email =
+    clerkUser.primaryEmailAddress?.emailAddress ??
+    clerkUser.emailAddresses[0]?.emailAddress ??
+    ""
 
-  if (sessionId) {
-    await sql`DELETE FROM sessions WHERE id = ${sessionId}`
-    cookieStore.delete(SESSION_COOKIE)
+  const name =
+    [clerkUser.firstName, clerkUser.lastName].filter(Boolean).join(" ") ||
+    clerkUser.username ||
+    email.split("@")[0] ||
+    "Member"
+
+  return {
+    clerkUserId: clerkUser.id,
+    email,
+    name,
+    imageUrl: clerkUser.imageUrl || null,
+    createdAt: new Date(clerkUser.createdAt).toISOString(),
+    metadataRole: clerkUser.publicMetadata?.role === "admin" ? "admin" : "user",
   }
 }
 
 export async function getCurrentUser(): Promise<SessionUser | null> {
+  const { userId } = await auth()
+  if (!userId) return null
+
+  const clerkUser = await currentUser()
+  if (!clerkUser) return null
+
+  const profile = toProfile(clerkUser)
+
   try {
-    const cookieStore = await cookies()
-    const sessionId = cookieStore.get(SESSION_COOKIE)?.value
-
-    if (!sessionId) return null
-
-    const rows = await sql`
-      SELECT u.id, u.email, u.name, u.role, u.is_active, u.created_at, u.profile_photo_url, u.bio
-      FROM users u
-      INNER JOIN sessions s ON s.user_id = u.id
-      WHERE s.id = ${sessionId}
-        AND s.expires_at > NOW()
-        AND u.is_active = true
-    `
-
-    if (rows.length === 0) {
-      // Session expired or invalid — clean up the stale cookie
-      cookieStore.delete(SESSION_COOKIE)
-      return null
+    const user = await syncUser(profile)
+    if (!user.is_active) return null
+    return user
+  } catch (error) {
+    // The database may be unreachable (or not provisioned yet). Auth still works
+    // because Clerk owns the session — we just fall back to the Clerk profile.
+    console.error("[v0] Failed to sync Clerk user with database:", error)
+    return {
+      id: profile.clerkUserId,
+      email: profile.email,
+      name: profile.name,
+      role: profile.metadataRole,
+      is_active: true,
+      created_at: profile.createdAt,
+      profile_photo_url: profile.imageUrl,
+      bio: null,
+      clerk_user_id: profile.clerkUserId,
     }
-    return rows[0] as SessionUser
-  } catch {
-    return null
   }
 }
 

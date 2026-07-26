@@ -1,26 +1,22 @@
 "use client"
 
-import { useEffect } from "react"
-import { useRouter } from "next/navigation"
-import { logoutAction } from "@/app/actions/auth"
+import { useEffect, useRef } from "react"
+import { useClerk } from "@clerk/nextjs"
 import { Loader2 } from "lucide-react"
 
 export default function LogoutPage() {
-  const router = useRouter()
+  const { signOut, loaded } = useClerk()
+  const hasSignedOut = useRef(false)
 
   useEffect(() => {
-    const handleLogout = async () => {
-      try {
-        await logoutAction()
-        router.push("/")
-      } catch (error) {
-        console.error("Logout error:", error)
-        router.push("/")
-      }
-    }
+    if (!loaded || hasSignedOut.current) return
+    hasSignedOut.current = true
 
-    handleLogout()
-  }, [router])
+    signOut({ redirectUrl: "/" }).catch((error) => {
+      console.error("Logout error:", error)
+      window.location.href = "/"
+    })
+  }, [loaded, signOut])
 
   return (
     <div className="flex min-h-screen items-center justify-center">

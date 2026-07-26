@@ -14,7 +14,7 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { Badge } from "@/components/ui/badge"
 import { cn } from "@/lib/utils"
-import { logoutAction } from "@/app/actions/auth"
+import { useClerk } from "@clerk/nextjs"
 import { SearchButton } from "@/components/search-overlay"
 import { GlobalSearch } from "@/components/global-search"
 import { ThemeToggle } from "@/components/theme-toggle"
@@ -43,6 +43,7 @@ export function Navigation({ user }: NavigationProps) {
   const [topicsOpen, setTopicsOpen] = useState(false)
   const [scrolled, setScrolled] = useState(false)
   const pathname = usePathname()
+  const { signOut } = useClerk()
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 12)
@@ -170,12 +171,11 @@ export function Navigation({ user }: NavigationProps) {
                     </DropdownMenuItem>
                   )}
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem asChild>
-                    <form action={logoutAction} className="w-full">
-                      <button type="submit" className="flex w-full items-center">
-                        <LogOut className="mr-2 h-4 w-4" /> Sign Out
-                      </button>
-                    </form>
+                  <DropdownMenuItem
+                    className="cursor-pointer"
+                    onSelect={() => signOut({ redirectUrl: "/" })}
+                  >
+                    <LogOut className="mr-2 h-4 w-4" /> Sign Out
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
@@ -247,11 +247,14 @@ export function Navigation({ user }: NavigationProps) {
                       <Shield className="h-4 w-4" /> Admin Panel
                     </Link>
                   )}
-                  <form action={logoutAction}>
-                    <Button variant="outline" className="w-full mt-1" type="submit">
-                      <LogOut className="mr-2 h-4 w-4" /> Sign Out
-                    </Button>
-                  </form>
+                  <Button
+                    variant="outline"
+                    className="w-full mt-1"
+                    type="button"
+                    onClick={() => signOut({ redirectUrl: "/" })}
+                  >
+                    <LogOut className="mr-2 h-4 w-4" /> Sign Out
+                  </Button>
                 </div>
               ) : (
                 <div className="flex flex-col gap-2">

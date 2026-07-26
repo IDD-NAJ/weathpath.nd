@@ -2,7 +2,13 @@
 
 import { sql } from "@/lib/db"
 import { requireAdmin } from "@/lib/auth"
+import { clerkClient } from "@clerk/nextjs/server"
 import { revalidatePath } from "next/cache"
+
+async function getClerkUserId(userId: string): Promise<string | null> {
+  const rows = await sql`SELECT clerk_user_id FROM users WHERE id = ${userId}`
+  return (rows[0]?.clerk_user_id as string | undefined) ?? null
+}
 
 export async function getUsers(search?: string) {
   await requireAdmin()
@@ -32,6 +38,15 @@ export async function updateUserRole(userId: string, role: "user" | "admin") {
   }
 
   await sql`UPDATE users SET role = ${role}, updated_at = NOW() WHERE id = ${userId}`
+
+  // Clerk stores the role in public metadata, which is what a fresh session
+  // syncs from — keep both in step.
+  const clerkUserId = await getClerkUserId(userId)
+  if (clerkUserId) {
+    const clerk = await clerkClient()
+    await clerk.users.updateUser(clerkUserId, { publicMetadata: { role } })
+  }
+
   revalidatePath("/admin/users")
 }
 
@@ -53,7 +68,13 @@ export async function deleteUser(userId: string) {
     throw new Error("You cannot delete your own account")
   }
 
-  await sql`DELETE FROM sessions WHERE user_id = ${userId}`
+  // Remove the Clerk account first so the credentials cannot outlive the profile.
+  const clerkUserId = await getClerkUserId(userId)
+  if (clerkUserId) {
+    const clerk = await clerkClient()
+    await clerk.users.deleteUser(clerkUserId)
+  }
+
   await sql`DELETE FROM users WHERE id = ${userId}`
   revalidatePath("/admin/users")
 }

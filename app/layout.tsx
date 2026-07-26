@@ -47,7 +47,20 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <ClerkProvider>
+    <ClerkProvider
+      appearance={{
+        // Inherit the app's own CSS variables so Clerk follows light/dark mode.
+        variables: {
+          colorPrimary: "oklch(0.47 0.17 26)",
+          colorBackground: "var(--card)",
+          colorText: "var(--foreground)",
+          colorTextSecondary: "var(--muted-foreground)",
+          colorInputBackground: "var(--background)",
+          colorInputText: "var(--foreground)",
+          colorDanger: "var(--destructive)",
+        },
+      }}
+    >
       <html lang="en" suppressHydrationWarning className="bg-background">
         <body className={`${dmSans.variable} ${dmSerif.variable} font-sans antialiased`}>
           <ThemeProvider
