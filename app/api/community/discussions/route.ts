@@ -1,4 +1,4 @@
-import { neon } from "@neondatabase/serverless"
+import { sql } from "@/lib/db"
 import { NextResponse } from "next/server"
 
 export async function GET(request: Request) {
@@ -8,8 +8,7 @@ export async function GET(request: Request) {
     const limit = parseInt(searchParams.get("limit") || "20")
     const offset = parseInt(searchParams.get("offset") || "0")
 
-    const sql = neon(process.env.DATABASE_URL!)
-
+    
     let query = `
       SELECT d.id, d.title, d.content, d.author_id, d.category, d.views, d.likes, d.created_at,
              m.name as author_name, m.email as author_email

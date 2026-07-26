@@ -1,4 +1,4 @@
-import { neon } from "@neondatabase/serverless"
+import { sql } from "@/lib/db"
 import { NextResponse } from "next/server"
 
 export async function GET(
@@ -7,8 +7,7 @@ export async function GET(
 ) {
   try {
     const courseId = parseInt(params.id)
-    const sql = neon(process.env.DATABASE_URL!)
-
+    
     const result = await sql(
       `SELECT * FROM courses WHERE id = $1`,
       [courseId]

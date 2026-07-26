@@ -1,5 +1,5 @@
+import { sql } from "@/lib/db"
 import { getCurrentUser } from "@/lib/auth"
-import { neon } from "@neondatabase/serverless"
 import { NextResponse } from "next/server"
 
 export async function GET(request: Request) {
@@ -10,7 +10,7 @@ export async function GET(request: Request) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
-    const sql = neon(process.env.DATABASE_URL!)
+    
     const { searchParams } = new URL(request.url)
     const status = searchParams.get("status") || "pending"
     const limit = parseInt(searchParams.get("limit") || "20")

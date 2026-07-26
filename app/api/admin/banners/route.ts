@@ -1,10 +1,9 @@
-import { neon } from '@neondatabase/serverless'
+import { sql } from "@/lib/db"
 import { NextRequest, NextResponse } from 'next/server'
-
-const sql = neon(process.env.DATABASE_URL!)
 
 export async function GET() {
   try {
+    
     const banners = await sql(
       `SELECT * FROM banners ORDER BY created_at DESC`,
     )
@@ -17,6 +16,7 @@ export async function GET() {
 
 export async function POST(request: NextRequest) {
   try {
+    const sql = neon(process.env.DATABASE_URL!)
     const { title, message, bannerType, linkUrl, linkText, bgColor, startsAt, endsAt, isActive } = await request.json()
 
     if (!title || !message) {

@@ -1,12 +1,11 @@
-import { neon } from '@neondatabase/serverless'
-
+import { sql } from "@/lib/db"
 export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url)
     const limit = parseInt(searchParams.get('limit') || '12')
     const offset = parseInt(searchParams.get('offset') || '0')
 
-    const sql = neon(process.env.DATABASE_URL!)
+    
     const courses = await sql(
       'SELECT id, slug, title, description, price_cents, cover_image, category, level, lessons, duration FROM courses ORDER BY created_at DESC LIMIT $1 OFFSET $2',
       [limit, offset]

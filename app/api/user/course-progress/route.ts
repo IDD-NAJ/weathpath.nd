@@ -1,4 +1,4 @@
-import { neon } from '@neondatabase/serverless'
+import { sql } from "@/lib/db"
 import { NextRequest, NextResponse } from 'next/server'
 
 export async function GET(request: NextRequest) {
@@ -13,8 +13,7 @@ export async function GET(request: NextRequest) {
       )
     }
 
-    const sql = neon(process.env.DATABASE_URL!)
-
+    
     // Get user's progress for this course
     const progress = await sql(`
       SELECT 

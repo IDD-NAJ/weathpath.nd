@@ -1,13 +1,12 @@
-import { neon } from '@neondatabase/serverless'
+import { sql } from "@/lib/db"
 import { NextRequest, NextResponse } from 'next/server'
-
-const sql = neon(process.env.DATABASE_URL!)
 
 export async function PUT(
   request: NextRequest,
   { params }: { params: { id: string } }
 ) {
   try {
+    
     const { title, message, bannerType, linkUrl, linkText, bgColor, startsAt, endsAt, isActive } = await request.json()
     const bannerId = parseInt(params.id)
 
@@ -44,6 +43,7 @@ export async function DELETE(
   { params }: { params: { id: string } }
 ) {
   try {
+    const sql = neon(process.env.DATABASE_URL!)
     const bannerId = parseInt(params.id)
 
     const result = await sql(`DELETE FROM banners WHERE id = $1`, [bannerId])

@@ -1,5 +1,5 @@
+import { sql } from "@/lib/db"
 import { getStripe } from '@/lib/stripe'
-import { neon } from '@neondatabase/serverless'
 import { createPurchase } from '@/lib/purchase-service'
 
 // Stripe webhook signature secret - set in environment
@@ -50,8 +50,7 @@ export async function POST(request: Request) {
         return Response.json({ error: 'Invalid session metadata' }, { status: 400 })
       }
 
-      const sql = neon(process.env.DATABASE_URL!)
-
+      
       // Idempotency: skip if this session was already recorded (e.g. by the
       // success-page auto-confirm flow)
       const existing = await sql(

@@ -1,4 +1,4 @@
-import { neon } from "@neondatabase/serverless"
+import { sql } from "@/lib/db"
 import { NextResponse } from "next/server"
 
 export async function GET(
@@ -7,8 +7,7 @@ export async function GET(
 ) {
   try {
     const discussionId = parseInt(params.id)
-    const sql = neon(process.env.DATABASE_URL!)
-
+    
     const replies = await sql(
       `SELECT r.id, r.content, r.author_id, r.likes, r.created_at,
               m.name as author_name, m.email as author_email

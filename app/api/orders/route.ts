@@ -1,4 +1,4 @@
-import { neon } from '@neondatabase/serverless'
+import { sql } from "@/lib/db"
 import { randomUUID } from 'crypto'
 
 export async function POST(request: Request) {
@@ -12,7 +12,7 @@ export async function POST(request: Request) {
       )
     }
 
-    const sql = neon(process.env.DATABASE_URL!)
+    
     const order_id = randomUUID()
 
     // Create order

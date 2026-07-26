@@ -1,9 +1,9 @@
-import { neon } from "@neondatabase/serverless"
+import { sql } from "@/lib/db"
 import { NextResponse } from "next/server"
 
 export async function GET() {
   try {
-    const sql = neon(process.env.DATABASE_URL!)
+    
     const courses = await sql(
       `SELECT id, slug, title, description, price_cents, category, level, lessons, 
               is_visible, status, created_at FROM courses ORDER BY created_at DESC`

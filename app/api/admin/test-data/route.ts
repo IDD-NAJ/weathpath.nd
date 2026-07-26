@@ -1,5 +1,4 @@
-import { neon } from '@neondatabase/serverless'
-
+import { sql } from "@/lib/db"
 export async function POST(request: Request) {
   const authHeader = request.headers.get('authorization')
   
@@ -8,8 +7,7 @@ export async function POST(request: Request) {
   }
 
   try {
-    const sql = neon(process.env.DATABASE_URL!)
-
+    
     // Insert test course
     const courseResult = await sql(
       `INSERT INTO courses (slug, title, subtitle, description, category, level, price_cents, cover_image, lessons, featured, is_visible, status, created_at)

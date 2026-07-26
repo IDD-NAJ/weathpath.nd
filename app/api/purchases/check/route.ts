@@ -1,4 +1,4 @@
-import { neon } from "@neondatabase/serverless"
+import { sql } from "@/lib/db"
 import { NextResponse } from "next/server"
 
 export async function GET(request: Request) {
@@ -14,8 +14,7 @@ export async function GET(request: Request) {
       )
     }
 
-    const sql = neon(process.env.DATABASE_URL!)
-
+    
     const result = await sql(
       `SELECT id, payment_status FROM user_purchases 
        WHERE user_email = $1 AND course_id = $2`,
