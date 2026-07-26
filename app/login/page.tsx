@@ -90,8 +90,20 @@ export default function LoginPage() {
       if (signIn.status === "complete") {
         const { error: finalErr } = await signIn.finalize({
           navigate: async (decorateUrl) => {
+            // Fetch the user's role from the server to route correctly
+            let destination = "/dashboard"
+            try {
+              const res = await fetch("/api/auth/role")
+              if (res.ok) {
+                const data = await res.json()
+                if (data.role === "admin") destination = "/admin"
+              }
+            } catch {
+              // Fall back to /dashboard on fetch failure
+            }
+
             // decorateUrl may return an external URL for Safari ITP cookie refresh
-            const url = await decorateUrl("/dashboard")
+            const url = await decorateUrl(destination)
             setSuccess(true)
             setAttempts(0)
             if (url.startsWith("https://")) {

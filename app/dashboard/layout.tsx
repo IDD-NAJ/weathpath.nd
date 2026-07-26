@@ -33,6 +33,7 @@ export default async function DashboardLayout({
 }) {
   const user = await getCurrentUser()
   if (!user) redirect("/login")
+  if (user.role === "admin") redirect("/admin")
 
   const initials = user.name
     .split(" ")

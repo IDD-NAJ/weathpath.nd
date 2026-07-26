@@ -19,14 +19,32 @@ export default function SsoCallbackPage() {
   const router = useRouter()
 
   useEffect(() => {
-    // handleRedirectCallback is the v5–v7 compatible method available on the
-    // Clerk client object — it handles the token exchange automatically.
-    clerk.handleRedirectCallback({
-      signInForceRedirectUrl: "/dashboard",
-      signUpForceRedirectUrl: "/dashboard",
-    }).catch(() => {
-      router.push("/login?error=oauth_failed")
-    })
+    async function handleCallback() {
+      try {
+        // Exchange the OAuth token — Clerk will call our navigate once complete
+        await clerk.handleRedirectCallback({
+          signInForceRedirectUrl: "/sso-callback?redirect=1",
+          signUpForceRedirectUrl: "/sso-callback?redirect=1",
+        })
+      } catch {
+        router.push("/login?error=oauth_failed")
+      }
+    }
+
+    // If Clerk already redirected here with ?redirect=1, the session is active —
+    // fetch the role and navigate to the correct dashboard
+    const params = new URLSearchParams(window.location.search)
+    if (params.get("redirect") === "1") {
+      fetch("/api/auth/role")
+        .then((res) => (res.ok ? res.json() : { role: "user" }))
+        .then((data) => {
+          router.replace(data.role === "admin" ? "/admin" : "/dashboard")
+        })
+        .catch(() => router.replace("/dashboard"))
+      return
+    }
+
+    handleCallback()
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
