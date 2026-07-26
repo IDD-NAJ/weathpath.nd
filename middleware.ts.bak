@@ -1,0 +1,4 @@
+// Re-export from proxy.ts for compatibility
+// Next.js 16 requires middleware.ts to export a function if it exists
+// The canonical middleware file is proxy.ts, but this file is restored on sync
+export { default, config } from "./proxy"
