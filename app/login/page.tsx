@@ -88,13 +88,24 @@ export default function LoginPage() {
 
       // Only finalize when status is 'complete' (no MFA required)
       if (signIn.status === "complete") {
-        const { error: finalErr } = await signIn.finalize()
+        const { error: finalErr } = await signIn.finalize({
+          navigate: async (decorateUrl) => {
+            // decorateUrl may return an external URL for Safari ITP cookie refresh
+            const url = await decorateUrl("/dashboard")
+            setSuccess(true)
+            setAttempts(0)
+            if (url.startsWith("https://")) {
+              window.location.href = url
+            } else {
+              router.push(url)
+            }
+          },
+        })
         if (finalErr) throw finalErr
+      } else {
+        // Should not normally happen for password strategy, but surface any status issues
+        throw new Error(`Unexpected sign-in status: ${signIn.status}`)
       }
-
-      setSuccess(true)
-      setAttempts(0)
-      setTimeout(() => router.push("/dashboard"), 700)
     } catch (err: unknown) {
       const newAttempts = attempts + 1
       setAttempts(newAttempts)

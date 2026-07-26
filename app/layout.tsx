@@ -46,9 +46,16 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode
 }>) {
+  const publishableKey = process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY
+  if (!publishableKey) {
+    throw new Error(
+      "NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY is not set. Add it to your Vercel project environment variables and redeploy."
+    )
+  }
+
   return (
-    <ClerkProvider>
-      <html lang="en" suppressHydrationWarning>
+    <ClerkProvider publishableKey={publishableKey}>
+      <html lang="en" suppressHydrationWarning className="bg-background">
         <body className={`${dmSans.variable} ${dmSerif.variable} font-sans antialiased bg-background text-foreground`}>
           <ThemeProvider
             attribute="class"
