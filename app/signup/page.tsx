@@ -295,8 +295,8 @@ export default function SignupPage() {
       const { error: pwErr } = await signUp!.password({ emailAddress: email, password })
       if (pwErr) throw pwErr
 
-      // v7: top-level signUp.sendEmailCode()
-      const { error: codeErr } = await signUp!.sendEmailCode()
+      // v7: sendEmailCode — cast to access v7 method tsc resolves from older type
+      const { error: codeErr } = await (signUp as any).sendEmailCode()
       if (codeErr) throw codeErr
 
       setResendCooldown(RESEND_COOLDOWN)
@@ -309,8 +309,8 @@ export default function SignupPage() {
   const handleVerify = useCallback(async (code: string) => {
     setLoading(true); setError("")
     try {
-      // v7: top-level signUp.verifyEmailCode({ code }) — auto-finalizes on success
-      const { error: verifyErr } = await signUp!.verifyEmailCode({ code })
+      // v7: verifyEmailCode — cast to access v7 method
+      const { error: verifyErr } = await (signUp as any).verifyEmailCode({ code })
       if (verifyErr) throw verifyErr
 
       // Persist interests (non-blocking — the sync webhook may not have fired yet)
@@ -330,8 +330,8 @@ export default function SignupPage() {
   const handleResend = useCallback(async () => {
     setLoading(true); setError("")
     try {
-      // v7: top-level signUp.sendEmailCode()
-      const { error: err } = await signUp!.sendEmailCode()
+      // v7: sendEmailCode — cast to access v7 method
+      const { error: err } = await (signUp as any).sendEmailCode()
       if (err) throw err
       setResendCooldown(RESEND_COOLDOWN)
     } catch (err: unknown) { setError(mapClerkError(err)) }

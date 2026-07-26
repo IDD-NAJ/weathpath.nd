@@ -22,8 +22,8 @@ export default function SsoCallbackPage() {
     // handleRedirectCallback is the v5–v7 compatible method available on the
     // Clerk client object — it handles the token exchange automatically.
     clerk.handleRedirectCallback({
-      afterSignInUrl: "/dashboard",
-      afterSignUpUrl: "/dashboard",
+      signInForceRedirectUrl: "/dashboard",
+      signUpForceRedirectUrl: "/dashboard",
     }).catch(() => {
       router.push("/login?error=oauth_failed")
     })
