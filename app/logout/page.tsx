@@ -1,32 +1,29 @@
 "use client"
 
+/**
+ * /logout — Signs the user out via Clerk and redirects home.
+ * Any nav bar "Log out" link points here.
+ */
+
 import { useEffect } from "react"
-import { useRouter } from "next/navigation"
-import { logoutAction } from "@/app/actions/auth"
-import { Loader2 } from "lucide-react"
+import { useClerk } from "@clerk/nextjs"
+import { TrendingUp, Loader2 } from "lucide-react"
 
 export default function LogoutPage() {
-  const router = useRouter()
+  const { signOut } = useClerk()
 
   useEffect(() => {
-    const handleLogout = async () => {
-      try {
-        await logoutAction()
-        router.push("/")
-      } catch (error) {
-        console.error("Logout error:", error)
-        router.push("/")
-      }
-    }
-
-    handleLogout()
-  }, [router])
+    signOut({ redirectUrl: "/" })
+  }, [signOut])
 
   return (
-    <div className="flex min-h-screen items-center justify-center">
-      <div className="text-center">
-        <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4" />
-        <p className="text-muted-foreground">Signing out...</p>
+    <div className="min-h-screen bg-background flex flex-col items-center justify-center gap-6">
+      <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary">
+        <TrendingUp className="h-6 w-6 text-primary-foreground" />
+      </div>
+      <div className="flex flex-col items-center gap-2">
+        <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+        <p className="text-sm text-muted-foreground">Signing out...</p>
       </div>
     </div>
   )
