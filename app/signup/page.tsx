@@ -313,12 +313,6 @@ export default function SignupPage() {
       const { error: verifyErr } = await signUp!.verifications.verifyEmailCode({ code })
       if (verifyErr) throw verifyErr
 
-      // Finalize to activate the session once status is complete
-      if (signUp!.status === "complete") {
-        const { error: finalErr } = await signUp!.finalize()
-        if (finalErr) throw finalErr
-      }
-
       // Persist interests (non-blocking — the sync webhook may not have fired yet)
       if (selectedInterests.length > 0) {
         fetch("/api/user/interests", {
@@ -328,7 +322,21 @@ export default function SignupPage() {
         }).catch(() => {/* non-blocking */})
       }
 
-      router.push("/dashboard")
+      // Finalize to activate the session once status is complete
+      if (signUp!.status === "complete") {
+        const { error: finalErr } = await signUp!.finalize({
+          navigate: async (decorateUrl) => {
+            // decorateUrl may return an external URL for Safari ITP cookie refresh
+            const url = await decorateUrl("/dashboard")
+            if (url.startsWith("https://")) {
+              window.location.href = url
+            } else {
+              router.push(url)
+            }
+          },
+        })
+        if (finalErr) throw finalErr
+      }
     } catch (err: unknown) { setError(mapClerkError(err)) }
     finally { setLoading(false) }
   }, [signUp, selectedInterests, router])
