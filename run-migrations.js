@@ -2,7 +2,7 @@ const fs = require('fs')
 const path = require('path')
 const { Pool } = require('pg')
 
-const DB_URL = 'postgresql://neondb_owner:npg_CdErv90DWHzP@ep-divine-frog-ahe05se1-pooler.c-3.us-east-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require'
+const DB_URL = 'postgresql://neondb_owner:npg_7cFPNAnKpt9T@ep-red-frog-aikrsekr-pooler.c-4.us-east-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require'
 
 const pool = new Pool({
   connectionString: DB_URL,
