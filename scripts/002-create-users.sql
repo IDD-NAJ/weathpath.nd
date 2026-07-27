@@ -2,11 +2,15 @@ CREATE TABLE IF NOT EXISTS users (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   name TEXT NOT NULL,
   email TEXT UNIQUE NOT NULL,
-  password_hash TEXT NOT NULL,
+  password_hash TEXT,
+  clerk_id TEXT UNIQUE,
   role TEXT NOT NULL DEFAULT 'user' CHECK (role IN ('user', 'admin')),
   is_active BOOLEAN DEFAULT true,
+  profile_photo_url TEXT,
+  bio TEXT,
   created_at TIMESTAMPTZ DEFAULT now(),
-  updated_at TIMESTAMPTZ DEFAULT now()
+  updated_at TIMESTAMPTZ DEFAULT now(),
+  CONSTRAINT auth_method_check CHECK (clerk_id IS NOT NULL OR password_hash IS NOT NULL)
 );
 
 CREATE TABLE IF NOT EXISTS sessions (
@@ -19,6 +23,7 @@ CREATE TABLE IF NOT EXISTS sessions (
 CREATE INDEX IF NOT EXISTS idx_sessions_user_id ON sessions(user_id);
 CREATE INDEX IF NOT EXISTS idx_sessions_expires_at ON sessions(expires_at);
 CREATE INDEX IF NOT EXISTS idx_users_email ON users(email);
+CREATE INDEX IF NOT EXISTS idx_users_clerk_id ON users(clerk_id);
 
 -- Update articles to reference custom users table
 ALTER TABLE articles DROP CONSTRAINT IF EXISTS articles_author_id_fkey;
