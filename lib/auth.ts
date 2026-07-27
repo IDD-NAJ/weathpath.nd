@@ -47,11 +47,17 @@ async function resolveClerkUser(clerkId: string): Promise<SessionUser | null> {
         AND is_active = true
       LIMIT 1
     `) as SessionUser[]
-    if (existing.length > 0) return existing[0]
+    if (existing.length > 0) {
+      console.log("[v0] Clerk user found in DB:", { userId: existing[0].id, email: existing[0].email })
+      return existing[0]
+    }
 
     // First-time sign-in: fetch the Clerk profile to get email + name
     const clerkUser = await currentUser()
-    if (!clerkUser) return null
+    if (!clerkUser) {
+      console.log("[v0] Clerk user not found in session")
+      return null
+    }
 
     const email = clerkUser.emailAddresses[0]?.emailAddress ?? ""
     const firstName = clerkUser.firstName ?? ""
@@ -59,7 +65,12 @@ async function resolveClerkUser(clerkId: string): Promise<SessionUser | null> {
     const name = [firstName, lastName].filter(Boolean).join(" ") || email.split("@")[0]
     const imageUrl = clerkUser.imageUrl ?? null
 
-    if (!email) return null
+    if (!email) {
+      console.log("[v0] No email found in Clerk user profile")
+      return null
+    }
+
+    console.log("[v0] First-time sign-in: creating/linking user", { email, name, clerkId })
 
     // Link-by-email: if an existing user row has this email, attach the clerk_id
     const linked = (await sql`
@@ -72,10 +83,14 @@ async function resolveClerkUser(clerkId: string): Promise<SessionUser | null> {
         AND is_active = true
       RETURNING id, email, name, role, is_active, created_at, profile_photo_url, bio, clerk_id
     `) as SessionUser[]
-    if (linked.length > 0) return linked[0]
+    if (linked.length > 0) {
+      console.log("[v0] Linked existing user to Clerk:", { userId: linked[0].id, email })
+      return linked[0]
+    }
 
     // Brand-new user: create a row with role='user'
     const newId = crypto.randomUUID()
+    console.log("[v0] Creating new user in DB", { newId, email, clerkId })
     const created = (await sql`
       INSERT INTO users (id, name, email, clerk_id, role, is_active, profile_photo_url)
       VALUES (${newId}, ${name}, ${email}, ${clerkId}, 'user', true, ${imageUrl})
@@ -85,8 +100,16 @@ async function resolveClerkUser(clerkId: string): Promise<SessionUser | null> {
             updated_at = NOW()
       RETURNING id, email, name, role, is_active, created_at, profile_photo_url, bio, clerk_id
     `) as SessionUser[]
-    return created.length > 0 ? created[0] : null
-  } catch {
+    
+    if (created.length > 0) {
+      console.log("[v0] New user created:", { userId: created[0].id, email })
+      return created[0]
+    }
+    
+    console.log("[v0] Failed to create user:", { email })
+    return null
+  } catch (err) {
+    console.error("[v0] Error resolving Clerk user:", { clerkId, error: err instanceof Error ? err.message : String(err) })
     return null
   }
 }
@@ -94,9 +117,14 @@ async function resolveClerkUser(clerkId: string): Promise<SessionUser | null> {
 export async function getCurrentUser(): Promise<SessionUser | null> {
   try {
     const { userId } = await auth()
-    if (!userId) return null
+    if (!userId) {
+      console.log("[v0] No Clerk session found")
+      return null
+    }
+    console.log("[v0] Clerk session found:", { userId })
     return resolveClerkUser(userId)
-  } catch {
+  } catch (err) {
+    console.error("[v0] Error getting current user:", err instanceof Error ? err.message : String(err))
     return null
   }
 }
