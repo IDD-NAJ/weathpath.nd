@@ -363,19 +363,19 @@ export default function SignupPage() {
   return (
     <div className="min-h-screen bg-background flex">
       {/* ── Left brand panel ── */}
-      <div className="hidden lg:flex lg:w-5/12 xl:w-1/2 flex-col justify-between p-12 bg-card border-r border-border relative overflow-hidden">
+      <div className="hidden lg:flex lg:w-5/12 xl:w-1/2 flex-col justify-between p-12 bg-gradient-to-br from-card via-card to-card/80 border-r border-border/50 relative overflow-hidden">
         <div
-          className="absolute inset-0 opacity-[0.03]"
+          className="absolute inset-0 opacity-[0.02]"
           style={{
             backgroundImage:
               "repeating-linear-gradient(0deg,transparent,transparent 59px,hsl(var(--border)) 59px,hsl(var(--border)) 60px),repeating-linear-gradient(90deg,transparent,transparent 59px,hsl(var(--border)) 59px,hsl(var(--border)) 60px)",
           }}
         />
-        <Link href="/" className="relative flex items-center gap-2.5 w-fit">
-          <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary">
+        <Link href="/" className="relative flex items-center gap-2.5 w-fit group">
+          <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary/90 group-hover:bg-primary transition-colors duration-300 shadow-sm group-hover:shadow-md">
             <TrendingUp className="h-5 w-5 text-primary-foreground" />
           </div>
-          <span className="text-xl font-bold tracking-tight font-sans text-foreground">WealthPath</span>
+          <span className="text-xl font-bold tracking-tight font-sans bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">WealthPath</span>
         </Link>
 
         <div className="relative space-y-6">
@@ -404,8 +404,8 @@ export default function SignupPage() {
       </div>
 
       {/* ── Right form panel ── */}
-      <div className="flex-1 flex items-center justify-center p-6 sm:p-10 overflow-y-auto">
-        <div className="w-full max-w-[440px] py-8">
+      <div className="flex-1 flex items-center justify-center p-6 sm:p-10 overflow-y-auto bg-gradient-to-b from-background to-background/50">
+        <div className="w-full max-w-[440px] py-8 animate-fade-in">
           {/* Mobile logo */}
           <Link href="/" className="lg:hidden flex items-center gap-2 mb-8 justify-center">
             <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary">
@@ -441,8 +441,8 @@ export default function SignupPage() {
               </div>
               <div className="space-y-1.5">
                 <label htmlFor="email" className="text-xs uppercase tracking-widest font-medium text-muted-foreground">Email</label>
-                <div className="relative">
-                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
+                <div className="relative group">
+                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground group-focus-within:text-primary transition-colors pointer-events-none" />
                   <Input
                     id="email"
                     type="email"
@@ -450,13 +450,13 @@ export default function SignupPage() {
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     onKeyDown={(e) => { if (e.key === "Enter" && !e.nativeEvent.isComposing) handleStepEmail() }}
-                    className="pl-10 h-11 bg-card border-border rounded-lg"
+                    className="pl-10 h-11 bg-card/50 border-border rounded-lg focus:bg-card focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all duration-200"
                     autoComplete="email"
                     disabled={loading}
                   />
                 </div>
               </div>
-              <Button onClick={handleStepEmail} className="w-full h-11 rounded-lg font-semibold" disabled={loading || !signUp}>
+              <Button onClick={handleStepEmail} className="w-full h-11 rounded-lg font-semibold bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg hover:shadow-xl transition-all duration-300 disabled:opacity-50" disabled={loading || !signUp}>
                 {loading ? <span className="flex items-center gap-2"><Loader2 className="h-4 w-4 animate-spin" />Continuing...</span> : "Continue"}
               </Button>
               <p className="text-center text-sm text-muted-foreground">
@@ -471,16 +471,16 @@ export default function SignupPage() {
             <div className="space-y-4">
               <div className="space-y-1.5">
                 <label htmlFor="password" className="text-xs uppercase tracking-widest font-medium text-muted-foreground">Password</label>
-                <div className="relative">
-                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
+                <div className="relative group">
+                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground group-focus-within:text-primary transition-colors pointer-events-none" />
                   <Input
                     id="password"
                     type={showPassword ? "text" : "password"}
                     placeholder="••••••••"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className="pl-10 pr-10 h-11 bg-card border-border rounded-lg"
-                    autoComplete="new-password"
+                    onKeyDown={(e) => { if (e.key === "Enter" && !e.nativeEvent.isComposing) handleStepPassword() }}
+                    className="pl-10 pr-10 h-11 bg-card/50 border-border rounded-lg focus:bg-card focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all duration-200"
                     disabled={loading}
                   />
                   <button type="button" onClick={() => setShowPassword((v) => !v)}

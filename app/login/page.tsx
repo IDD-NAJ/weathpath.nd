@@ -126,21 +126,21 @@ export default function LoginPage() {
   return (
     <div className="min-h-screen bg-background flex">
       {/* ── Left brand panel ── */}
-      <div className="hidden lg:flex lg:w-5/12 xl:w-1/2 flex-col justify-between p-12 bg-card border-r border-border relative overflow-hidden">
-        {/* subtle grid texture */}
+      <div className="hidden lg:flex lg:w-5/12 xl:w-1/2 flex-col justify-between p-12 bg-gradient-to-br from-card via-card to-card/80 border-r border-border/50 relative overflow-hidden">
+        {/* Animated gradient background */}
         <div
-          className="absolute inset-0 opacity-[0.03]"
+          className="absolute inset-0 opacity-[0.02]"
           style={{
             backgroundImage:
               "repeating-linear-gradient(0deg,transparent,transparent 59px,hsl(var(--border)) 59px,hsl(var(--border)) 60px),repeating-linear-gradient(90deg,transparent,transparent 59px,hsl(var(--border)) 59px,hsl(var(--border)) 60px)",
           }}
         />
 
-        <Link href="/" className="relative flex items-center gap-2.5 w-fit">
-          <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary">
+        <Link href="/" className="relative flex items-center gap-2.5 w-fit group">
+          <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary/90 group-hover:bg-primary transition-colors duration-300 shadow-sm group-hover:shadow-md">
             <TrendingUp className="h-5 w-5 text-primary-foreground" />
           </div>
-          <span className="text-xl font-bold tracking-tight font-sans text-foreground">WealthPath</span>
+          <span className="text-xl font-bold tracking-tight font-sans bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">WealthPath</span>
         </Link>
 
         <div className="relative space-y-8">
@@ -178,8 +178,8 @@ export default function LoginPage() {
       </div>
 
       {/* ── Right form panel ── */}
-      <div className="flex-1 flex items-center justify-center p-6 sm:p-10">
-        <div className="w-full max-w-[420px]">
+      <div className="flex-1 flex items-center justify-center p-6 sm:p-10 bg-gradient-to-b from-background to-background/50">
+        <div className="w-full max-w-[420px] animate-fade-in">
           {/* Mobile logo */}
           <Link href="/" className="lg:hidden flex items-center justify-center gap-2 mb-8">
             <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary">
@@ -242,15 +242,15 @@ export default function LoginPage() {
               <label htmlFor="email" className="text-xs uppercase tracking-widest font-medium text-muted-foreground">
                 Email
               </label>
-              <div className="relative">
-                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
+              <div className="relative group">
+                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground group-focus-within:text-primary transition-colors pointer-events-none" />
                 <Input
                   id="email"
                   type="email"
                   placeholder="you@example.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="pl-10 h-11 bg-card border-border rounded-lg"
+                  className="pl-10 h-11 bg-card/50 border-border rounded-lg focus:bg-card focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all duration-200"
                   required
                   autoComplete="email"
                   disabled={loading || success || isLocked}
@@ -265,21 +265,21 @@ export default function LoginPage() {
                 </label>
                 <Link
                   href="/forgot-password"
-                  className="text-xs text-primary hover:text-primary/80 transition-colors font-medium"
+                  className="text-xs text-primary hover:text-primary/80 transition-colors font-medium hover:underline underline-offset-2"
                   tabIndex={-1}
                 >
                   Forgot password?
                 </Link>
               </div>
-              <div className="relative">
-                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
+              <div className="relative group">
+                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground group-focus-within:text-primary transition-colors pointer-events-none" />
                 <Input
                   id="password"
                   type={showPassword ? "text" : "password"}
                   placeholder="••••••••"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="pl-10 pr-10 h-11 bg-card border-border rounded-lg"
+                  className="pl-10 pr-10 h-11 bg-card/50 border-border rounded-lg focus:bg-card focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all duration-200"
                   required
                   autoComplete="current-password"
                   disabled={loading || success || isLocked}
@@ -311,13 +311,18 @@ export default function LoginPage() {
 
             <Button
               type="submit"
-              className="w-full h-11 rounded-lg font-semibold tracking-wide mt-2"
+              className="w-full h-11 rounded-lg font-semibold tracking-wide mt-2 bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg hover:shadow-xl transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
               disabled={loading || success || isLocked || !signIn}
             >
               {loading ? (
                 <span className="flex items-center gap-2">
                   <Loader2 className="h-4 w-4 animate-spin" />
                   Signing in...
+                </span>
+              ) : success ? (
+                <span className="flex items-center gap-2">
+                  <CheckCircle2 className="h-4 w-4" />
+                  Signed in
                 </span>
               ) : "Sign In"}
             </Button>

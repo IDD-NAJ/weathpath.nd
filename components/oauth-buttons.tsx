@@ -51,21 +51,21 @@ export function OAuthButtons({ mode = "signin" }: OAuthButtonsProps) {
       <Button
         type="button"
         variant="outline"
-        className="h-11 rounded-lg bg-card border-border hover:bg-muted gap-2"
+        className="h-11 rounded-lg bg-card/50 border-border hover:bg-card hover:border-primary/50 hover:shadow-md transition-all duration-200 gap-2 font-medium"
         onClick={() => handleOAuth("oauth_google")}
       >
         <GoogleIcon />
-        <span className="text-sm font-medium">Google</span>
+        <span className="hidden sm:inline text-sm">Google</span>
       </Button>
 
       <Button
         type="button"
         variant="outline"
-        className="h-11 rounded-lg bg-card border-border hover:bg-muted gap-2"
+        className="h-11 rounded-lg bg-card/50 border-border hover:bg-card hover:border-primary/50 hover:shadow-md transition-all duration-200 gap-2 font-medium"
         onClick={() => handleOAuth("oauth_github")}
       >
         <Github className="h-4 w-4 flex-shrink-0" />
-        <span className="text-sm font-medium">GitHub</span>
+        <span className="hidden sm:inline text-sm">GitHub</span>
       </Button>
     </div>
   )
