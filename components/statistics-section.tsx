@@ -54,9 +54,9 @@ export function StatisticsSection() {
               key={index}
               animation="scale-in"
               delay={index * 0.15}
-              className="bg-card rounded-lg p-6 border border-border hover:border-primary/50 transition-colors duration-300"
+              className="min-w-0 bg-card rounded-lg p-6 border border-border hover:border-primary/50 transition-colors duration-300"
             >
-              <div className="text-4xl md:text-5xl font-bold text-primary mb-2 font-sans">
+              <div className="text-3xl md:text-4xl font-bold text-primary mb-2 font-sans leading-tight break-words">
                 <AnimatedCounter
                   value={stat.value}
                   prefix={stat.prefix}
