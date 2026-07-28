@@ -20,6 +20,8 @@ import { LayoutWrapper } from "@/components/layout-wrapper"
 import { getCurrentUser } from "@/lib/auth"
 import { AnimatedSection, AnimatedItem, StaggerChildren } from "@/components/animated-section"
 
+export const dynamic = 'force-dynamic'
+
 const values = [
   {
     icon: BookOpen,
