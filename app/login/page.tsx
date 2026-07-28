@@ -79,7 +79,7 @@ export default function LoginPage() {
               <SignIn
                 routing="hash"
                 signUpUrl="/signup"
-                fallbackRedirectUrl="/dashboard"
+                fallbackRedirectUrl="/auth-callback"
                 appearance={{
                   baseTheme: undefined,
                   elements: {
