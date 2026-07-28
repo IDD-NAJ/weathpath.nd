@@ -1,13 +1,13 @@
-import { SignIn } from "@clerk/nextjs";
+import { SignUp } from "@clerk/nextjs";
 import Link from "next/link";
 import { TrendingUp } from "lucide-react";
 
 export const metadata = {
-  title: "Sign In - WealthPath",
-  description: "Sign in to your WealthPath account to access your learning dashboard.",
+  title: "Sign Up - WealthPath",
+  description: "Create your WealthPath account and start learning how to build lasting passive wealth.",
 };
 
-export default function LoginPage() {
+export default function SignupPage() {
   return (
     <div className="min-h-screen bg-background flex">
       {/* ── Left brand panel ── */}
@@ -34,15 +34,19 @@ export default function LoginPage() {
         <div className="relative z-10 space-y-6">
           <div className="space-y-3">
             <h2 className="text-3xl font-serif font-bold text-foreground leading-editorial">
-              Build Lasting Passive Income
+              Start Your Wealth-Building Journey
             </h2>
             <p className="text-sm text-muted-foreground leading-relaxed">
-              Sign in to access your personalized learning journey. Master wealth-building strategies designed for real life.
+              Join thousands learning to build lasting passive income through clear, practical education. No jargon. No shortcuts.
             </p>
           </div>
 
           <div className="space-y-3 pt-4">
-            {["Clear, jargon-free education", "Interactive tools & guides", "Real success stories"].map((item) => (
+            {[
+              "Learn at your own pace",
+              "Interactive learning tools",
+              "Real-world success stories",
+            ].map((item) => (
               <div key={item} className="flex items-center gap-2.5">
                 <div className="flex h-5 w-5 items-center justify-center rounded-full bg-primary/20 flex-shrink-0">
                   <div className="h-2 w-2 rounded-full bg-primary" />
@@ -60,23 +64,22 @@ export default function LoginPage() {
       </div>
 
       {/* ── Right form panel ── */}
-      <div className="flex-1 flex items-center justify-center p-6 sm:p-10 bg-gradient-to-b from-background to-background/50">
-        <div className="w-full max-w-[420px] animate-fade-in">
+      <div className="flex-1 flex items-center justify-center p-6 sm:p-10 overflow-y-auto bg-gradient-to-b from-background to-background/50">
+        <div className="w-full max-w-[440px] py-8 animate-fade-in">
           <div className="space-y-6">
             {/* Header */}
             <div className="space-y-2 text-center">
-              <h1 className="text-2xl font-serif font-bold text-foreground">Welcome Back</h1>
+              <h1 className="text-2xl font-serif font-bold text-foreground">Create Your Account</h1>
               <p className="text-sm text-muted-foreground">
-                Sign in to continue your wealth-building journey
+                Join WealthPath and start building your passive wealth empire
               </p>
             </div>
 
-            {/* Clerk SignIn Component */}
+            {/* Clerk SignUp Component */}
             <div className="flex justify-center">
-              <SignIn
-                path="/login"
-                routing="path"
-                signUpUrl="/signup"
+              <SignUp
+                routing="hash"
+                signInUrl="/login"
                 fallbackRedirectUrl="/dashboard"
                 appearance={{
                   baseTheme: undefined,
@@ -120,11 +123,11 @@ export default function LoginPage() {
               />
             </div>
 
-            {/* Sign up link */}
+            {/* Sign in link */}
             <p className="text-center text-sm text-muted-foreground">
-              Don&apos;t have an account?{" "}
-              <Link href="/signup" className="font-medium text-primary hover:text-primary/80 transition-colors">
-                Sign up
+              Already have an account?{" "}
+              <Link href="/login" className="font-medium text-primary hover:text-primary/80 transition-colors">
+                Sign in
               </Link>
             </p>
           </div>
