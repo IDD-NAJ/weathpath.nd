@@ -7,6 +7,9 @@ export const metadata = {
   description: "Sign in to your WealthPath account to access your learning dashboard.",
 };
 
+// Force this route to always be treated as a fresh dynamic route
+export const dynamic = "force-dynamic";
+
 export default function LoginPage() {
   return (
     <div className="min-h-screen bg-background flex">
